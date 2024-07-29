@@ -1,0 +1,72 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Logs
+logs/
+*.log
+
+# Editor directories and files
+.vscode/
+.idea/
+.DS_Store
+
+# React/Vite build output
+dist/
+out/
+build/
+
+# React Native
+.expo/
+web-build/
+
+# Testing
+coverage/
+
+# Miscellaneous
+*.env
+*.local
+.env.*
+.local.*
+.swp
+*.swp
+*.swo
+
+# Solana/Anchor
+.anchor/
+target/
+.migrations/
+lib/cargo.lock
+*.rs.bk
+
+# TypeScript
+*.tsbuildinfo
+*.d.ts
+
+# Ignore yarn and npm lock files if not using them
+# Uncomment if needed
+# yarn.lock
+# package-lock.json
+
+# VSCode specific
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Solana CLI configurations
+.solana/
+
+# Ignore IDE and system files
+*.sublime-project
+*.sublime-workspace
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+Thumbs.db
