@@ -11,8 +11,7 @@ import {
 } from '@solana/wallet-adapter-react-ui';
 import { clusterApiUrl } from '@solana/web3.js';
 
-import CounterState from "./components/counter-state";
-import IncrementButton from "./components/increment-button";
+import TicTacToe from './components/tic-tac-toe';
 
 import './App.css';
 
@@ -36,9 +35,8 @@ function App() {
       <WalletProvider wallets={wallets} autoConnect>
         <WalletModalProvider>
           <WalletMultiButton />
-          <h1>Hello Solana</h1> 
-          <CounterState />
-          <IncrementButton />
+          <h1>Tic Tac Toe!</h1>
+          <TicTacToe />
         </WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>
