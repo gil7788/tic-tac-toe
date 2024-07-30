@@ -1,28 +1,42 @@
-export type Counter = {
-  "version": "0.2.0",
-  "name": "counter",
+export type TicTacToe = {
+  "version": "0.1.0",
+  "name": "tic_tac_toe",
   "instructions": [
     {
-      "name": "initialize",
+      "name": "play",
       "accounts": [
         {
-          "name": "user",
+          "name": "game",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "tile",
+          "type": {
+            "defined": "Tile"
+          }
+        }
+      ]
+    },
+    {
+      "name": "setupGame",
+      "accounts": [
+        {
+          "name": "game",
           "isMut": true,
           "isSigner": true
         },
         {
-          "name": "counter",
+          "name": "playerOne",
           "isMut": true,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "counter"
-              }
-            ]
-          }
+          "isSigner": true
         },
         {
           "name": "systemProgram",
@@ -30,74 +44,180 @@ export type Counter = {
           "isSigner": false
         }
       ],
-      "args": []
-    },
-    {
-      "name": "increment",
-      "accounts": [
+      "args": [
         {
-          "name": "counter",
-          "isMut": true,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "counter"
-              }
-            ]
-          }
+          "name": "playerTwo",
+          "type": "publicKey"
         }
-      ],
-      "args": []
+      ]
     }
   ],
   "accounts": [
     {
-      "name": "counter",
+      "name": "Game",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "count",
-            "type": "u64"
+            "name": "players",
+            "type": {
+              "array": [
+                "publicKey",
+                2
+              ]
+            }
           },
           {
-            "name": "bump",
+            "name": "turn",
+            "type": "u8"
+          },
+          {
+            "name": "board",
+            "type": {
+              "array": [
+                {
+                  "array": [
+                    {
+                      "option": {
+                        "defined": "Sign"
+                      }
+                    },
+                    3
+                  ]
+                },
+                3
+              ]
+            }
+          },
+          {
+            "name": "state",
+            "type": {
+              "defined": "GameState"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "types": [
+    {
+      "name": "Tile",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "row",
+            "type": "u8"
+          },
+          {
+            "name": "column",
             "type": "u8"
           }
         ]
       }
+    },
+    {
+      "name": "Sign",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "X"
+          },
+          {
+            "name": "O"
+          }
+        ]
+      }
+    },
+    {
+      "name": "GameState",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Active"
+          },
+          {
+            "name": "Tie"
+          },
+          {
+            "name": "Won",
+            "fields": [
+              {
+                "name": "winner",
+                "type": "publicKey"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "TileOutOfBounds"
+    },
+    {
+      "code": 6001,
+      "name": "TileAlreadySet"
+    },
+    {
+      "code": 6002,
+      "name": "GameAlreadyOver"
+    },
+    {
+      "code": 6003,
+      "name": "NotPlayersTurn"
+    },
+    {
+      "code": 6004,
+      "name": "GameAlreadyStarted"
     }
   ]
 };
 
-export const IDL: Counter = {
-  "version": "0.2.0",
-  "name": "counter",
+
+export const IDL: TicTacToe = {
+  "version": "0.1.0",
+  "name": "tic_tac_toe",
   "instructions": [
     {
-      "name": "initialize",
+      "name": "play",
       "accounts": [
         {
-          "name": "user",
+          "name": "game",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "tile",
+          "type": {
+            "defined": "Tile"
+          }
+        }
+      ]
+    },
+    {
+      "name": "setupGame",
+      "accounts": [
+        {
+          "name": "game",
           "isMut": true,
           "isSigner": true
         },
         {
-          "name": "counter",
+          "name": "playerOne",
           "isMut": true,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "counter"
-              }
-            ]
-          }
+          "isSigner": true
         },
         {
           "name": "systemProgram",
@@ -105,45 +225,136 @@ export const IDL: Counter = {
           "isSigner": false
         }
       ],
-      "args": []
-    },
-    {
-      "name": "increment",
-      "accounts": [
+      "args": [
         {
-          "name": "counter",
-          "isMut": true,
-          "isSigner": false,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "type": "string",
-                "value": "counter"
-              }
-            ]
-          }
+          "name": "playerTwo",
+          "type": "publicKey"
         }
-      ],
-      "args": []
+      ]
     }
   ],
   "accounts": [
     {
-      "name": "counter",
+      "name": "Game",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "count",
-            "type": "u64"
+            "name": "players",
+            "type": {
+              "array": [
+                "publicKey",
+                2
+              ]
+            }
           },
           {
-            "name": "bump",
+            "name": "turn",
+            "type": "u8"
+          },
+          {
+            "name": "board",
+            "type": {
+              "array": [
+                {
+                  "array": [
+                    {
+                      "option": {
+                        "defined": "Sign"
+                      }
+                    },
+                    3
+                  ]
+                },
+                3
+              ]
+            }
+          },
+          {
+            "name": "state",
+            "type": {
+              "defined": "GameState"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "types": [
+    {
+      "name": "Tile",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "row",
+            "type": "u8"
+          },
+          {
+            "name": "column",
             "type": "u8"
           }
         ]
       }
+    },
+    {
+      "name": "Sign",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "X"
+          },
+          {
+            "name": "O"
+          }
+        ]
+      }
+    },
+    {
+      "name": "GameState",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Active"
+          },
+          {
+            "name": "Tie"
+          },
+          {
+            "name": "Won",
+            "fields": [
+              {
+                "name": "winner",
+                "type": "publicKey"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "TileOutOfBounds"
+    },
+    {
+      "code": 6001,
+      "name": "TileAlreadySet"
+    },
+    {
+      "code": 6002,
+      "name": "GameAlreadyOver"
+    },
+    {
+      "code": 6003,
+      "name": "NotPlayersTurn"
+    },
+    {
+      "code": 6004,
+      "name": "GameAlreadyStarted"
     }
   ]
 };
