@@ -10,8 +10,7 @@ import {
   WalletMultiButton,
 } from '@solana/wallet-adapter-react-ui';
 import { clusterApiUrl } from '@solana/web3.js';
-
-import TicTacToeBoard from './components/tic-tac-toe';
+import Home from './components/Home';
 
 import './App.css';
 
@@ -34,9 +33,7 @@ function App() {
     <ConnectionProvider endpoint={endpoint}>
       <WalletProvider wallets={wallets} autoConnect>
         <WalletModalProvider>
-          <WalletMultiButton />
-          <h1>Tic Tac Toe!</h1>
-          <TicTacToeBoard />
+          <Home></Home>
         </WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>

@@ -30,29 +30,20 @@ export interface Game {
     state: GameState;
 }
 
-const TicTacToeBoard: React.FC = () => {
-    const { connection } = useConnection();
-    const wallet = useAnchorWallet();
-    const [program, setProgram] = useState<Program<TicTacToe> | null>(null);
-    const [gamePublicKey, setGamePublicKey] = useState<PublicKey | null>(null);
-    const [cells, setCells] = useState<string[]>(Array(9).fill(''));
-    const [info, setInfo] = useState<string>('circle goes first');
-    const [playerTwo] = useState<Keypair>(
-        Keypair.fromSecretKey(Uint8Array.from(keypairData.secretKey))
-    );
-    const [turn, setTurn] = useState<number>(1);
+export interface TicTacToeBoardProps {
+    gamePublicKey: PublicKey | null;
+    setGamePublicKey: React.Dispatch<React.SetStateAction<PublicKey | null>>;
+    setInfo: React.Dispatch<React.SetStateAction<string>>;
+    setTurn: React.Dispatch<React.SetStateAction<number>>;
+    cells: string[];
+    setCells: React.Dispatch<React.SetStateAction<string[]>>;
+    turn: number;
+    playerTwo: Keypair;
+    program: Program<TicTacToe> | null;
+}
 
-    useEffect(() => {
-        if (wallet) {
-            console.log('Initializing provider and program');
-            const program = setupProgram(wallet);
-            setProgram(program);
-            console.log('Program set:', program);
-        } else {
-            console.log('No wallet connected');
-            setProgram(null);
-        }
-    }, [wallet, connection]);
+const TicTacToeBoard: React.FC<TicTacToeBoardProps> = ({ gamePublicKey, setGamePublicKey, setInfo, setTurn, cells, setCells, turn, playerTwo, program }) => {
+    const wallet = useAnchorWallet();
 
     const fetchGameState = async (gamePublicKey: PublicKey, retries = 5, delay = 1000): Promise<Game> => {
         while (retries > 0) {
@@ -67,41 +58,6 @@ const TicTacToeBoard: React.FC = () => {
             }
         }
         throw new Error('Failed to fetch game state');
-    };
-
-    const setupGame = async () => {
-        if (program && wallet) {
-            console.log('Setting up game');
-            const gameKeypair = web3.Keypair.generate();
-            setGamePublicKey(gameKeypair.publicKey);
-
-            try {
-                await program.methods
-                    .setupGame(playerTwo.publicKey)
-                    .accounts({
-                        game: gameKeypair.publicKey,
-                        playerOne: wallet.publicKey,
-                        systemProgram: web3.SystemProgram.programId,
-                    })
-                    .signers([gameKeypair])
-                    .rpc();
-
-                const gameState = await fetchGameState(gameKeypair.publicKey);
-                if (!gameState) {
-                    throw new Error('Game state not found');
-                }
-                console.log('Game state after setup:', gameState);
-                setCells(Array(9).fill(''));
-                setInfo(`Game setup! ${gameState.turn === 1 ? 'circle' : 'cross'} goes first.`);
-                setTurn(gameState.turn);
-            } catch (error: any) {
-                console.error('Error during game setup:', error);
-                setInfo(`Error: ${error.message}`);
-                return;
-            }
-        } else {
-            console.log('Program or wallet not available');
-        }
     };
 
     const play = async (index: number) => {
@@ -151,7 +107,7 @@ const TicTacToeBoard: React.FC = () => {
             setCells(newCells);
             console.log('New cells:', newCells);
             if (gameState.state.won) {
-                setInfo(`Game over! ${gameState.state.won.winner.toBase58()} wins!`);
+                setInfo(`${gameState.state.won.winner.toBase58()} wins!`);
                 return;
             }
             if (gameState.state.tie) {
@@ -159,7 +115,7 @@ const TicTacToeBoard: React.FC = () => {
                 return;
             }
 
-            setInfo(`It is now ${gameState.turn % 2 === 1 ? 'circle' : 'cross'}'s turn`);
+            setInfo(`It is now ${gameState.turn % 2 === 1 ? 'cross' : 'circle'}'s turn`);
             setTurn(gameState.turn);
         } catch (error: any) {
             console.error('Error during play:', error);
@@ -206,29 +162,16 @@ const TicTacToeBoard: React.FC = () => {
     };
 
     return (
-        <div>
-            {wallet ? (
-                <>
-                    <div className="button-wrapper">
-                        <div className="confetti-button"></div>
-                    </div>
-                    <button onClick={setupGame}>Setup Game</button>
-                    <div id="gameboard">
-                        {cells.map((cell, index) => (
-                            <div
-                                key={index}
-                                className="square"
-                                onClick={() => handleClick(index)}
-                            >
-                                {cell && <div className={cell}></div>}
-                            </div>
-                        ))}
-                    </div>
-                    <p id="info">{info}</p>
-                </>
-            ) : (
-                <p>Please connect your wallet to play TicTacToe.</p>
-            )}
+        <div id="gameboard">
+            {cells.map((cell, index) => (
+                <div
+                    key={index}
+                    className="square"
+                    onClick={() => handleClick(index)}
+                >
+                    {cell && <div className={cell}></div>}
+                </div>
+            ))}
         </div>
     );
 };
