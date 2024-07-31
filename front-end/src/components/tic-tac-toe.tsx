@@ -1,11 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { useAnchorWallet, useConnection } from '@solana/wallet-adapter-react';
+import { useAnchorWallet } from '@solana/wallet-adapter-react';
 import { web3, Program } from '@coral-xyz/anchor';
 import { PublicKey, Keypair } from '@solana/web3.js';
-import { setupProgram } from '../anchor/setup';
 import { TicTacToe } from '../anchor/idl.ts';
 import '../tic-tac-toe.css';
-import keypairData from './keypair.json';
 
 export interface Tile {
     row: number;
@@ -42,10 +39,10 @@ export interface TicTacToeBoardProps {
     program: Program<TicTacToe> | null;
 }
 
-const TicTacToeBoard: React.FC<TicTacToeBoardProps> = ({ gamePublicKey, setGamePublicKey, setInfo, setTurn, cells, setCells, turn, playerTwo, program }) => {
+const TicTacToeBoard: React.FC<TicTacToeBoardProps> = ({ gamePublicKey, setInfo, setTurn, cells, setCells, turn, playerTwo, program }) => {
     const wallet = useAnchorWallet();
 
-    const fetchGameState = async (gamePublicKey: PublicKey, retries = 5, delay = 1000): Promise<Game> => {
+    async (gamePublicKey: PublicKey, retries = 5, delay = 1000): Promise<Game> => {
         while (retries > 0) {
             try {
                 const gameState = await program!.account.game.fetch(gamePublicKey) as unknown as Game;

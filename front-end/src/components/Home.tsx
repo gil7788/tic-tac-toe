@@ -109,7 +109,7 @@ const Home: React.FC = () => {
                 </div>
             ) : (
                 <div>
-                    <button onClick={setupGame} className='start-btn'>Start Game</button>
+                    <button onClick={setupGame} className='start-btn'>Start Game!</button>
                     <div className="button-container">
                         <WalletMultiButton className="custom-wallet-button" />
                     </div>

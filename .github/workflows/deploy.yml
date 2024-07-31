@@ -1,0 +1,36 @@
+name: Deploy to Firebase Hosting
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+
+      - name: Navigate to front-end directory and install dependencies
+        run: |
+          cd front-end
+          yarn install
+
+      - name: Build the project
+        run: |
+          cd front-end
+          CI=false yarn build
+
+      - name: Deploy to Firebase
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        run: |
+          yarn global add firebase-tools
+          firebase deploy --only hosting --project solana-tic-tac-toe
