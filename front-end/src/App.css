@@ -1,8 +1,6 @@
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  /* text-align: center; */
+  width: 100%;
+  height: 100%;
 }
 
 .card {
@@ -11,4 +9,126 @@
 
 .read-the-docs {
   color: #888;
+}
+
+.home {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.title {
+  position: fixed;
+  top: 4rem;
+}
+
+
+.start-btn {
+  font-size: 2em;
+}
+
+.game-container {
+  position: fixed;
+  top: 25%;
+}
+
+.restart-btn {
+  margin-bottom: 2rem;
+
+}
+
+.adapter {
+  color: green;
+}
+
+#info {
+  position: relative;
+  top: 1rem;
+  text-align: center;
+}
+
+.footer {
+  padding: 1em 0;
+  text-align: center;
+  background-color: #1a1a1a;
+  color: rgba(255, 255, 255, 0.87);
+  height: 1rem;
+  width: 100%;
+  position: fixed;
+  bottom: 0;
+}
+
+.footer p {
+  margin: 0;
+  font-size: 1em;
+}
+
+@media (prefers-color-scheme: light) {
+  .footer {
+    background-color: #f9f9f9;
+    color: #213547;
+  }
+}
+
+.restart-btn {
+  font-size: 1.5em;
+  padding: 0.5em 1em;
+  background-color: #4CAF50;
+  /* Green background */
+  color: white;
+  /* White text */
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: center;
+  display: inline-block;
+  margin-top: 2rem;
+  /* Ensure spacing for the restart button */
+  transition: background-color 0.3s ease;
+  width: 100%;
+}
+
+.restart-btn:hover {
+  background-color: #45a049;
+  /* Darker green on hover */
+}
+
+
+/* App.css */
+
+.button-container {
+  display: flex;
+  justify-content: center;
+  /* Center horizontally */
+  align-items: center;
+  /* Center vertically */
+  margin-top: 2rem;
+  /* Full viewport height */
+}
+
+.custom-wallet-button {
+  background-color: #007bff;
+  /* Custom background color */
+  color: #ffffff;
+  /* Custom text color */
+  padding: 10px 20px;
+  /* Custom padding */
+  border-radius: 5px;
+  /* Custom border radius */
+  border: none;
+  /* Remove border */
+  font-size: 16px;
+  /* Custom font size */
+  cursor: pointer;
+  /* Pointer cursor on hover */
+  transition: background-color 0.3s;
+  /* Smooth background color transition */
+}
+
+.custom-wallet-button:hover {
+  background-color: #0056b3;
+  /* Change background color on hover */
 }
