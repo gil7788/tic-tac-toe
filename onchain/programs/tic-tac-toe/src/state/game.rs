@@ -59,13 +59,6 @@ impl Game {
         Ok(())
     }
 
-    fn is_winning_trio(&self, trio: [(usize, usize); 3]) -> bool {
-        let [first, second, third] = trio;
-        self.board[first.0][first.1].is_some()
-            && self.board[first.0][first.1] == self.board[second.0][second.1]
-            && self.board[first.0][first.1] == self.board[third.0][third.1]
-    }
-
     fn update_state(&mut self) {
         for i in 0..=2 {
             // three of the same in one row
@@ -108,6 +101,13 @@ impl Game {
         // game has no more free tiles
         // -> game ends in a tie
         self.state = GameState::Tie;
+    }
+
+    fn is_winning_trio(&self, trio: [(usize, usize); 3]) -> bool {
+        let [first, second, third] = trio;
+        self.board[first.0][first.1].is_some()
+            && self.board[first.0][first.1] == self.board[second.0][second.1]
+            && self.board[first.0][first.1] == self.board[third.0][third.1]
     }
 }
 

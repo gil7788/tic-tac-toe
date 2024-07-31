@@ -1,266 +1,104 @@
-export type TicTacToe = {
-  "version": "0.1.0",
-  "name": "tic_tac_toe",
-  "instructions": [
-    {
-      "name": "play",
-      "accounts": [
-        {
-          "name": "game",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "player",
-          "isMut": false,
-          "isSigner": true
-        }
-      ],
-      "args": [
-        {
-          "name": "tile",
-          "type": {
-            "defined": "Tile"
-          }
-        }
-      ]
-    },
-    {
-      "name": "setupGame",
-      "accounts": [
-        {
-          "name": "game",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "playerOne",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "playerTwo",
-          "type": "publicKey"
-        }
-      ]
-    }
-  ],
-  "accounts": [
-    {
-      "name": "Game",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "players",
-            "type": {
-              "array": [
-                "publicKey",
-                2
-              ]
-            }
-          },
-          {
-            "name": "turn",
-            "type": "u8"
-          },
-          {
-            "name": "board",
-            "type": {
-              "array": [
-                {
-                  "array": [
-                    {
-                      "option": {
-                        "defined": "Sign"
-                      }
-                    },
-                    3
-                  ]
-                },
-                3
-              ]
-            }
-          },
-          {
-            "name": "state",
-            "type": {
-              "defined": "GameState"
-            }
-          }
-        ]
-      }
-    }
-  ],
-  "types": [
-    {
-      "name": "Tile",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "row",
-            "type": "u8"
-          },
-          {
-            "name": "column",
-            "type": "u8"
-          }
-        ]
-      }
-    },
-    {
-      "name": "Sign",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "X"
-          },
-          {
-            "name": "O"
-          }
-        ]
-      }
-    },
-    {
-      "name": "GameState",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "Active"
-          },
-          {
-            "name": "Tie"
-          },
-          {
-            "name": "Won",
-            "fields": [
-              {
-                "name": "winner",
-                "type": "publicKey"
-              }
-            ]
-          }
-        ]
-      }
-    }
-  ],
-  "errors": [
-    {
-      "code": 6000,
-      "name": "TileOutOfBounds"
-    },
-    {
-      "code": 6001,
-      "name": "TileAlreadySet"
-    },
-    {
-      "code": 6002,
-      "name": "GameAlreadyOver"
-    },
-    {
-      "code": 6003,
-      "name": "NotPlayersTurn"
-    },
-    {
-      "code": 6004,
-      "name": "GameAlreadyStarted"
-    }
-  ]
+import { Idl } from '@coral-xyz/anchor';
+
+export type TicTacToe = Idl & {
+  address: string;
+  metadata: {
+    name: string;
+    version: string;
+    spec: string;
+    description: string;
+  };
 };
 
-
 export const IDL: TicTacToe = {
-  "version": "0.1.0",
-  "name": "tic_tac_toe",
-  "instructions": [
+  address: "6WmnboLMNbXwnx2FvjjuowfXqufjjsnP1ojgGQdBcPzK",
+  metadata: {
+    name: "ticTacToe",
+    version: "0.1.0",
+    spec: "0.1.0",
+    description: "Created with Anchor"
+  },
+  version: "0.1.0",
+  name: "tic_tac_toe",
+  instructions: [
     {
-      "name": "play",
-      "accounts": [
+      name: "play",
+      accounts: [
         {
-          "name": "game",
-          "isMut": true,
-          "isSigner": false
+          name: "game",
+          isMut: true,
+          isSigner: false
         },
         {
-          "name": "player",
-          "isMut": false,
-          "isSigner": true
+          name: "player",
+          isMut: false,
+          isSigner: true
         }
       ],
-      "args": [
+      args: [
         {
-          "name": "tile",
-          "type": {
-            "defined": "Tile"
+          name: "tile",
+          type: {
+            defined: "Tile"
           }
         }
       ]
     },
     {
-      "name": "setupGame",
-      "accounts": [
+      name: "setupGame",
+      accounts: [
         {
-          "name": "game",
-          "isMut": true,
-          "isSigner": true
+          name: "game",
+          isMut: true,
+          isSigner: true
         },
         {
-          "name": "playerOne",
-          "isMut": true,
-          "isSigner": true
+          name: "playerOne",
+          isMut: true,
+          isSigner: true
         },
         {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
+          name: "systemProgram",
+          isMut: false,
+          isSigner: false
         }
       ],
-      "args": [
+      args: [
         {
-          "name": "playerTwo",
-          "type": "publicKey"
+          name: "playerTwo",
+          type: "publicKey"
         }
       ]
     }
   ],
-  "accounts": [
+  accounts: [
     {
-      "name": "Game",
-      "type": {
-        "kind": "struct",
-        "fields": [
+      name: "Game",
+      type: {
+        kind: "struct",
+        fields: [
           {
-            "name": "players",
-            "type": {
-              "array": [
+            name: "players",
+            type: {
+              array: [
                 "publicKey",
                 2
               ]
             }
           },
           {
-            "name": "turn",
-            "type": "u8"
+            name: "turn",
+            type: "u8"
           },
           {
-            "name": "board",
-            "type": {
-              "array": [
+            name: "board",
+            type: {
+              array: [
                 {
-                  "array": [
+                  array: [
                     {
-                      "option": {
-                        "defined": "Sign"
+                      option: {
+                        defined: "Sign"
                       }
                     },
                     3
@@ -271,63 +109,63 @@ export const IDL: TicTacToe = {
             }
           },
           {
-            "name": "state",
-            "type": {
-              "defined": "GameState"
+            name: "state",
+            type: {
+              defined: "GameState"
             }
           }
         ]
       }
     }
   ],
-  "types": [
+  types: [
     {
-      "name": "Tile",
-      "type": {
-        "kind": "struct",
-        "fields": [
+      name: "Tile",
+      type: {
+        kind: "struct",
+        fields: [
           {
-            "name": "row",
-            "type": "u8"
+            name: "row",
+            type: "u8"
           },
           {
-            "name": "column",
-            "type": "u8"
+            name: "column",
+            type: "u8"
           }
         ]
       }
     },
     {
-      "name": "Sign",
-      "type": {
-        "kind": "enum",
-        "variants": [
+      name: "Sign",
+      type: {
+        kind: "enum",
+        variants: [
           {
-            "name": "X"
+            name: "X"
           },
           {
-            "name": "O"
+            name: "O"
           }
         ]
       }
     },
     {
-      "name": "GameState",
-      "type": {
-        "kind": "enum",
-        "variants": [
+      name: "GameState",
+      type: {
+        kind: "enum",
+        variants: [
           {
-            "name": "Active"
+            name: "Active"
           },
           {
-            "name": "Tie"
+            name: "Tie"
           },
           {
-            "name": "Won",
-            "fields": [
+            name: "Won",
+            fields: [
               {
-                "name": "winner",
-                "type": "publicKey"
+                name: "winner",
+                type: "publicKey"
               }
             ]
           }
@@ -335,26 +173,26 @@ export const IDL: TicTacToe = {
       }
     }
   ],
-  "errors": [
+  errors: [
     {
-      "code": 6000,
-      "name": "TileOutOfBounds"
+      code: 6000,
+      name: "TileOutOfBounds"
     },
     {
-      "code": 6001,
-      "name": "TileAlreadySet"
+      code: 6001,
+      name: "TileAlreadySet"
     },
     {
-      "code": 6002,
-      "name": "GameAlreadyOver"
+      code: 6002,
+      name: "GameAlreadyOver"
     },
     {
-      "code": 6003,
-      "name": "NotPlayersTurn"
+      code: 6003,
+      name: "NotPlayersTurn"
     },
     {
-      "code": 6004,
-      "name": "GameAlreadyStarted"
+      code: 6004,
+      name: "GameAlreadyStarted"
     }
   ]
 };

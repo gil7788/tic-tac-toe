@@ -28,7 +28,7 @@ describe('tic-tac-toe', () => {
   const program = anchor.workspace.TicTacToe as Program<TicTacToe>;
   const programProvider = program.provider as anchor.AnchorProvider;
 
-  it('setup game!', async() => {
+  it('setup game!', async () => {
     const gameKeypair = anchor.web3.Keypair.generate();
     const playerOne = programProvider.wallet;
     const playerTwo = anchor.web3.Keypair.generate();
@@ -49,7 +49,7 @@ describe('tic-tac-toe', () => {
     expect(gameState.state).to.eql({ active: {} });
     expect(gameState.board)
       .to
-      .eql([[null,null,null],[null,null,null],[null,null,null]]);
+      .eql([[null, null, null], [null, null, null], [null, null, null]]);
   });
 
   it('player one wins!', async () => {
@@ -73,19 +73,19 @@ describe('tic-tac-toe', () => {
     expect(gameState.state).to.eql({ active: {} });
     expect(gameState.board)
       .to
-      .eql([[null,null,null],[null,null,null],[null,null,null]]);
+      .eql([[null, null, null], [null, null, null], [null, null, null]]);
 
     await play(
       program,
       gameKeypair.publicKey,
       playerOne,
-      {row: 0, column: 0},
+      { row: 0, column: 0 },
       2,
       { active: {}, },
       [
-        [{x:{}},null,null],
-        [null,null,null],
-        [null,null,null]
+        [{ x: {} }, null, null],
+        [null, null, null],
+        [null, null, null]
       ]
     );
 
@@ -98,13 +98,13 @@ describe('tic-tac-toe', () => {
         // change sth about the tx because
         // duplicate tx that come in too fast
         // after each other may get dropped
-        {row: 1, column: 0},
+        { row: 1, column: 0 },
         2,
         { active: {}, },
         [
-          [{x:{}},null,null],
-          [null,null,null],
-          [null,null,null]
+          [{ x: {} }, null, null],
+          [null, null, null],
+          [null, null, null]
         ]
       );
       chai.assert(false, "should've failed but didn't ");
@@ -121,13 +121,13 @@ describe('tic-tac-toe', () => {
       program,
       gameKeypair.publicKey,
       playerTwo,
-      {row: 1, column: 0},
+      { row: 1, column: 0 },
       3,
       { active: {}, },
       [
-        [{x:{}},null,null],
-        [{o:{}},null,null],
-        [null,null,null]
+        [{ x: {} }, null, null],
+        [{ o: {} }, null, null],
+        [null, null, null]
       ]
     );
 
@@ -135,13 +135,13 @@ describe('tic-tac-toe', () => {
       program,
       gameKeypair.publicKey,
       playerOne,
-      {row: 0, column: 1},
+      { row: 0, column: 1 },
       4,
       { active: {}, },
       [
-        [{x:{}},{x: {}},null],
-        [{o:{}},null,null],
-        [null,null,null]
+        [{ x: {} }, { x: {} }, null],
+        [{ o: {} }, null, null],
+        [null, null, null]
       ]
     );
 
@@ -150,13 +150,13 @@ describe('tic-tac-toe', () => {
         program,
         gameKeypair.publicKey,
         playerTwo,
-        {row: 5, column: 1}, // out of bounds row
+        { row: 5, column: 1 }, // out of bounds row
         4,
         { active: {}, },
         [
-          [{x:{}},{x: {}},null],
-          [{o:{}},null,null],
-          [null,null,null]
+          [{ x: {} }, { x: {} }, null],
+          [{ o: {} }, null, null],
+          [null, null, null]
         ]
       );
       chai.assert(false, "should've failed but didn't ");
@@ -171,13 +171,13 @@ describe('tic-tac-toe', () => {
       program,
       gameKeypair.publicKey,
       playerTwo,
-      {row: 1, column: 1},
+      { row: 1, column: 1 },
       5,
       { active: {}, },
       [
-        [{x:{}},{x: {}},null],
-        [{o:{}},{o:{}},null],
-        [null,null,null]
+        [{ x: {} }, { x: {} }, null],
+        [{ o: {} }, { o: {} }, null],
+        [null, null, null]
       ]
     );
 
@@ -186,13 +186,13 @@ describe('tic-tac-toe', () => {
         program,
         gameKeypair.publicKey,
         playerOne,
-        {row: 0, column: 0},
+        { row: 0, column: 0 },
         5,
         { active: {}, },
         [
-          [{x:{}},{x: {}},null],
-          [{o:{}},{o:{}},null],
-          [null,null,null]
+          [{ x: {} }, { x: {} }, null],
+          [{ o: {} }, { o: {} }, null],
+          [null, null, null]
         ]
       );
       chai.assert(false, "should've failed but didn't ");
@@ -206,13 +206,13 @@ describe('tic-tac-toe', () => {
       program,
       gameKeypair.publicKey,
       playerOne,
-      {row: 0, column: 2},
+      { row: 0, column: 2 },
       5,
       { won: { winner: playerOne.publicKey }, },
       [
-        [{x:{}},{x: {}},{x: {}}],
-        [{o:{}},{o:{}},null],
-        [null,null,null]
+        [{ x: {} }, { x: {} }, { x: {} }],
+        [{ o: {} }, { o: {} }, null],
+        [null, null, null]
       ]
     );
 
@@ -221,13 +221,13 @@ describe('tic-tac-toe', () => {
         program,
         gameKeypair.publicKey,
         playerOne,
-        {row: 0, column: 2},
+        { row: 0, column: 2 },
         5,
         { won: { winner: playerOne.publicKey }, },
         [
-          [{x:{}},{x: {}},{x: {}}],
-          [{o:{}},{o:{}},null],
-          [null,null,null]
+          [{ x: {} }, { x: {} }, { x: {} }],
+          [{ o: {} }, { o: {} }, null],
+          [null, null, null]
         ]
       );
       chai.assert(false, "should've failed but didn't ");
@@ -259,19 +259,19 @@ describe('tic-tac-toe', () => {
     expect(gameState.state).to.eql({ active: {} });
     expect(gameState.board)
       .to
-      .eql([[null,null,null],[null,null,null],[null,null,null]]);
+      .eql([[null, null, null], [null, null, null], [null, null, null]]);
 
     await play(
       program,
       gameKeypair.publicKey,
       playerOne,
-      {row: 0, column: 0},
+      { row: 0, column: 0 },
       2,
       { active: {}, },
       [
-        [{x:{}},null,null],
-        [null,null,null],
-        [null,null,null]
+        [{ x: {} }, null, null],
+        [null, null, null],
+        [null, null, null]
       ]
     );
 
@@ -279,13 +279,13 @@ describe('tic-tac-toe', () => {
       program,
       gameKeypair.publicKey,
       playerTwo,
-      {row: 1, column: 1},
+      { row: 1, column: 1 },
       3,
       { active: {}, },
       [
-        [{x:{}},null,null],
-        [null,{o:{}},null],
-        [null,null,null]
+        [{ x: {} }, null, null],
+        [null, { o: {} }, null],
+        [null, null, null]
       ]
     );
 
@@ -293,13 +293,13 @@ describe('tic-tac-toe', () => {
       program,
       gameKeypair.publicKey,
       playerOne,
-      {row: 2, column: 0},
+      { row: 2, column: 0 },
       4,
       { active: {}, },
       [
-        [{x:{}},null,null],
-        [null,{o:{}},null],
-        [{x:{}},null,null]
+        [{ x: {} }, null, null],
+        [null, { o: {} }, null],
+        [{ x: {} }, null, null]
       ]
     );
 
@@ -307,13 +307,13 @@ describe('tic-tac-toe', () => {
       program,
       gameKeypair.publicKey,
       playerTwo,
-      {row: 1, column: 0},
+      { row: 1, column: 0 },
       5,
       { active: {}, },
       [
-        [{x:{}},null,null],
-        [{o:{}},{o:{}},null],
-        [{x:{}},null,null]
+        [{ x: {} }, null, null],
+        [{ o: {} }, { o: {} }, null],
+        [{ x: {} }, null, null]
       ]
     );
 
@@ -321,13 +321,13 @@ describe('tic-tac-toe', () => {
       program,
       gameKeypair.publicKey,
       playerOne,
-      {row: 1, column: 2},
+      { row: 1, column: 2 },
       6,
       { active: {}, },
       [
-        [{x:{}},null,null],
-        [{o:{}},{o:{}},{x:{}}],
-        [{x:{}},null,null]
+        [{ x: {} }, null, null],
+        [{ o: {} }, { o: {} }, { x: {} }],
+        [{ x: {} }, null, null]
       ]
     );
 
@@ -335,13 +335,13 @@ describe('tic-tac-toe', () => {
       program,
       gameKeypair.publicKey,
       playerTwo,
-      {row: 0, column: 1},
+      { row: 0, column: 1 },
       7,
       { active: {}, },
       [
-        [{x:{}},{o:{}},null],
-        [{o:{}},{o:{}},{x:{}}],
-        [{x:{}},null,null]
+        [{ x: {} }, { o: {} }, null],
+        [{ o: {} }, { o: {} }, { x: {} }],
+        [{ x: {} }, null, null]
       ]
     );
 
@@ -349,13 +349,13 @@ describe('tic-tac-toe', () => {
       program,
       gameKeypair.publicKey,
       playerOne,
-      {row: 2, column: 1},
+      { row: 2, column: 1 },
       8,
       { active: {}, },
       [
-        [{x:{}},{o:{}},null],
-        [{o:{}},{o:{}},{x:{}}],
-        [{x:{}},{x:{}},null]
+        [{ x: {} }, { o: {} }, null],
+        [{ o: {} }, { o: {} }, { x: {} }],
+        [{ x: {} }, { x: {} }, null]
       ]
     );
 
@@ -363,13 +363,13 @@ describe('tic-tac-toe', () => {
       program,
       gameKeypair.publicKey,
       playerTwo,
-      {row: 2, column: 2},
+      { row: 2, column: 2 },
       9,
       { active: {}, },
       [
-        [{x:{}},{o:{}},null],
-        [{o:{}},{o:{}},{x:{}}],
-        [{x:{}},{x:{}},{o:{}}]
+        [{ x: {} }, { o: {} }, null],
+        [{ o: {} }, { o: {} }, { x: {} }],
+        [{ x: {} }, { x: {} }, { o: {} }]
       ]
     );
 
@@ -378,13 +378,13 @@ describe('tic-tac-toe', () => {
       program,
       gameKeypair.publicKey,
       playerOne,
-      {row: 0, column: 2},
+      { row: 0, column: 2 },
       9,
       { tie: {}, },
       [
-        [{x:{}},{o:{}},{x:{}}],
-        [{o:{}},{o:{}},{x:{}}],
-        [{x:{}},{x:{}},{o:{}}]
+        [{ x: {} }, { o: {} }, { x: {} }],
+        [{ o: {} }, { o: {} }, { x: {} }],
+        [{ x: {} }, { x: {} }, { o: {} }]
       ]
     );
   })
