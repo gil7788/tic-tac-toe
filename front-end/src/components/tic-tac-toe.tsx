@@ -90,67 +90,11 @@ const TicTacToeBoard: React.FC<TicTacToeBoardProps> = ({ gamePublicKey, setInfo,
                 .signers(turn % 2 === 1 ? [] : [playerTwo])
                 .rpc();
 
-            const gameState = await retryFetchGameState(gamePublicKey, row, column, turn + 1, 5, 1000);
-            if (!gameState || !gameState.board) {
-                throw new Error('Game state not found');
-            }
-            console.log('Game state after play:', gameState);
-            console.log('Board:', gameState.board);
-            console.log('Flat board:', gameState.board.flat());
-            console.log('Game state => Active, Won, Tie:', gameState.state);
-
-            const newCells = transformBoard(gameState.board);
-
-            setCells(newCells);
-            console.log('New cells:', newCells);
-            if (gameState.state.won) {
-                setInfo(`${gameState.state.won.winner.toBase58()} wins!`);
-                return;
-            }
-            if (gameState.state.tie) {
-                setInfo('Game over! It is a tie!');
-                return;
-            }
-
-            setInfo(`It is now ${gameState.turn % 2 === 1 ? 'cross' : 'circle'}'s turn`);
-            setTurn(gameState.turn);
         } catch (error: any) {
             console.error('Error during play:', error);
             setInfo(`Error: ${error.message}`);
         }
     };
-
-    const retryFetchGameState = async (gamePublicKey: PublicKey, row: number, column: number, expectedTurn: number, retries: number, delay: number): Promise<Game> => {
-        while (retries > 0) {
-            try {
-                const gameState = await program!.account.game.fetch(gamePublicKey) as unknown as Game;
-                if (gameState.state.won || gameState.state.tie) {
-                    console.log('Game over:', JSON.stringify(gameState.state));
-                    return gameState;
-                }
-                if (gameState && gameState.turn === expectedTurn && gameState.board[row][column] !== null) {  // Check if turn has updated and move has been reflected
-                    return gameState;
-                }
-            } catch (error) {
-                console.log(`Retrying fetch game state... attempts left: ${retries - 1}`);
-            }
-            await new Promise(resolve => setTimeout(resolve, delay));
-            retries--;
-        }
-        throw new Error('Failed to fetch updated game state');
-    };
-
-    function transformBoard(board: ({ x?: {} } | { o?: {} } | null)[][]): string[] {
-        return board.flat().map(cell => {
-            if (cell && 'x' in cell) {
-                return Sign.X;
-            } else if (cell && 'o' in cell) {
-                return Sign.O;
-            } else {
-                return '';
-            }
-        });
-    }
 
     const handleClick = (index: number) => {
         if (cells[index] === '') {

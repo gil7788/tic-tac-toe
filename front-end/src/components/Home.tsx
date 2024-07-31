@@ -4,13 +4,11 @@ import { Program } from '@coral-xyz/anchor';
 import { PublicKey, Keypair, SystemProgram } from '@solana/web3.js';
 import { setupProgram } from '../anchor/setup';
 import { TicTacToe } from '../anchor/idl.ts';
-import TicTacToeBoard, { Game } from './tic-tac-toe';
+import TicTacToeBoard, { Game, Sign } from './tic-tac-toe';
 import keypairData from './keypair.json';
 import Footer from './Footer.tsx';
-import '../App.css'
-import {
-    WalletMultiButton,
-} from '@solana/wallet-adapter-react-ui';
+import '../App.css';
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 
 const Home: React.FC = () => {
     const { connection } = useConnection();
@@ -24,6 +22,7 @@ const Home: React.FC = () => {
     );
     const [turn, setTurn] = useState<number>(1);
     const [gameStarted, setGameStarted] = useState<boolean>(false);
+    const [awaitingPlayer, setAwaitingPlayer] = useState<boolean>(false);
 
     useEffect(() => {
         if (wallet) {
@@ -36,6 +35,115 @@ const Home: React.FC = () => {
             setProgram(null);
         }
     }, [wallet, connection]);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (gamePublicKey && program) {
+                fetchGameState(gamePublicKey)
+                    .then(gameState => {
+                        if (!gameState) {
+                            console.error('Game state not found');
+                            return;
+                        }
+                        processState(gameState);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching game state:', error);
+                        setInfo(`Error: ${error.message}`);
+                    });
+            }
+        }, 100);
+
+        return () => {
+            clearInterval(interval);
+        };
+    }, [gamePublicKey, program]);
+
+    async function fetchGameState(gamePublicKey: PublicKey): Promise<Game | null> {
+        let gameState: Game | null = null;
+        try {
+            gameState = await program!.account.game.fetch(gamePublicKey) as unknown as Game;
+        } catch (error) {
+            throw new Error('Failed to fetch updated game state');
+        }
+        return gameState;
+    };
+
+    function processState(gameState: Game) {
+        if (!gameState.board) {
+            throw new Error('Board not found');
+        } else if (gameState.turn === 1) {
+            setCells(Array(9).fill(''));
+            setInfo(`Game setup! ${gameState.turn === 1 ? 'cross' : 'circle'} goes first.`);
+            setGameStarted(true);
+            setTurn(gameState.turn);
+            return;
+        } else {
+            console.log('Game state after play:', gameState);
+            console.log('Board:', gameState.board);
+            console.log('Flat board:', gameState.board.flat());
+            console.log('Game state => Active, Won, Tie:', gameState.state);
+
+            const newCells = transformBoard(gameState.board);
+
+            setCells(newCells);
+            console.log('New cells:', newCells);
+            setInfo(`It is now ${gameState.turn % 2 === 1 ? 'cross' : 'circle'}'s turn`);
+            setTurn(gameState.turn);
+        }
+
+        if (gameState.state && gameState.state.won) {
+            setInfo(`${gameState.state.won.winner.toBase58()} wins!`);
+            return;
+        } else if (gameState.state && gameState.state.tie) {
+            setInfo('Game over! It is a tie!');
+            return;
+        }
+    }
+
+    function transformBoard(board: ({ x?: {} } | { o?: {} } | null)[][]): string[] {
+        return board.flat().map(cell => {
+            if (cell && 'x' in cell) {
+                return Sign.X;
+            } else if (cell && 'o' in cell) {
+                return Sign.O;
+            } else {
+                return '';
+            }
+        });
+    }
+
+    const getInvitationLink = async () => {
+        if (program && wallet && !awaitingPlayer) {
+            console.log('Inviting player');
+            const gameKeypair = Keypair.generate();
+            setGamePublicKey(gameKeypair.publicKey);
+            const gameLink = getGameLink(gameKeypair.publicKey);
+
+            try {
+                await program.methods
+                    .createGame(gameKeypair.publicKey)
+                    .accounts({
+                        game: gameKeypair.publicKey,
+                        playerOne: wallet.publicKey,
+                        systemProgram: SystemProgram.programId
+                    })
+                    .signers([gameKeypair])
+                    .rpc();
+            } catch (error: any) {
+                console.error('Error creating game:', error);
+            }
+
+            setAwaitingPlayer(true);
+            return gameLink;
+        } else {
+            console.error('Program or wallet not available');
+        }
+    };
+
+    const getGameLink = (gamePublicKey: PublicKey): string => {
+        return `localhost:5173/${gamePublicKey.toBase58()}`;
+    };
 
     const setupGame = async () => {
         if (program && wallet) {
@@ -53,16 +161,6 @@ const Home: React.FC = () => {
                     })
                     .signers([gameKeypair])
                     .rpc();
-
-                const gameState = await fetchGameState(gameKeypair.publicKey);
-                if (!gameState) {
-                    throw new Error('Game state not found');
-                }
-                console.log('Game state after setup:', gameState);
-                setCells(Array(9).fill(''));
-                setInfo(`Game setup! ${gameState.turn === 1 ? 'cross' : 'circle'} goes first.`);
-                setGameStarted(true);
-                setTurn(gameState.turn);
             } catch (error: any) {
                 console.error('Error during game setup:', error);
                 setInfo(`Error: ${error.message}`);
@@ -71,21 +169,6 @@ const Home: React.FC = () => {
         } else {
             console.log('Program or wallet not available');
         }
-    };
-
-    const fetchGameState = async (gamePublicKey: PublicKey, retries = 5, delay = 1000): Promise<Game> => {
-        while (retries > 0) {
-            try {
-                const gameState = await program!.account.game.fetch(gamePublicKey) as unknown as Game;
-                return gameState;
-            } catch (error) {
-                if (retries === 1) throw error;
-                console.log(`Retrying fetch game state... attempts left: ${retries - 1}`);
-                await new Promise(resolve => setTimeout(resolve, delay));
-                retries--;
-            }
-        }
-        throw new Error('Failed to fetch game state');
     };
 
     return (
@@ -110,16 +193,14 @@ const Home: React.FC = () => {
             ) : (
                 <div>
                     <button onClick={setupGame} className='start-btn'>Start Game!</button>
+                    <button onClick={getInvitationLink} className='start-btn'>Invite</button>
                     <div className="button-container">
                         <WalletMultiButton className="custom-wallet-button" />
                     </div>
                 </div>
-
-
-
             )}
             <Footer />
-        </div >
+        </div>
     );
 };
 
