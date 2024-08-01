@@ -9,7 +9,13 @@ import {
   WalletModalProvider,
 } from '@solana/wallet-adapter-react-ui';
 import { clusterApiUrl } from '@solana/web3.js';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+} from 'react-router-dom';
 import Home from './components/Home';
+import GameView from './components/GameView'; // Assuming you have a Game component
 
 import './App.css';
 
@@ -32,7 +38,13 @@ function App() {
     <ConnectionProvider endpoint={endpoint}>
       <WalletProvider wallets={wallets} autoConnect>
         <WalletModalProvider>
-          <Home></Home>
+          <Router>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/home" element={<Home />} />
+              <Route path="/:gamePublicKey" element={<GameView />} />
+            </Routes>
+          </Router>
         </WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>
