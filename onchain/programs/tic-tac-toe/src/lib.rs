@@ -6,15 +6,18 @@ pub mod errors;
 pub mod instructions;
 pub mod state;
 
-// this key needs to be changed to whatever public key is returned by "anchor keys list"
 declare_id!("6WmnboLMNbXwnx2FvjjuowfXqufjjsnP1ojgGQdBcPzK");
 
 #[program]
 pub mod tic_tac_toe {
     use super::*;
 
-    pub fn setup_game(ctx: Context<SetupGame>, player_two: Pubkey) -> Result<()> {
-        instructions::setup_game::setup_game(ctx, player_two)
+    pub fn create_game(ctx: Context<CreateGame>) -> Result<()> {
+        instructions::create_game::create_game(ctx)
+    }
+
+    pub fn join_game(ctx: Context<JoinGame>, player_two: Pubkey) -> Result<()> {
+        instructions::join_game::join_game(ctx, player_two)
     }
 
     pub fn play(ctx: Context<Play>, tile: Tile) -> Result<()> {
