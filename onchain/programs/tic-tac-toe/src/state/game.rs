@@ -2,6 +2,7 @@ use crate::errors::TicTacToeError;
 use anchor_lang::prelude::*;
 use num_derive::*;
 use num_traits::*;
+use std::fmt;
 
 #[account]
 pub struct Game {
@@ -14,10 +15,27 @@ pub struct Game {
 impl Game {
     pub const MAXIMUM_SIZE: usize = (32 * 2) + 1 + (9 * (1 + 1)) + (32 + 1);
 
-    pub fn start(&mut self, players: [Pubkey; 2]) -> Result<()> {
+    pub fn create(&mut self, player_one: [Pubkey; 1]) -> Result<()> {
         require_eq!(self.turn, 0, TicTacToeError::GameAlreadyStarted);
-        self.players = players;
+        self.players = [player_one[0], Pubkey::default()];
+        self.turn = 0;
+        self.state = GameState::Pending;
+        Ok(())
+    }
+
+    // pub fn start(&mut self, players: [Pubkey; 2]) -> Result<()> {
+    //     require_eq!(self.turn, 0, TicTacToeError::GameAlreadyStarted);
+    //     self.players = players;
+    //     self.turn = 1;
+    //     self.state = GameState::Active;
+    //     Ok(())
+    // }
+
+    pub fn join(&mut self, player_one: Pubkey, player_two: Pubkey) -> Result<()> {
+        require_eq!(&self.state, &GameState::Pending);
+        self.players = [player_one, player_two];
         self.turn = 1;
+        self.state = GameState::Active;
         Ok(())
     }
 
@@ -113,9 +131,23 @@ impl Game {
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq)]
 pub enum GameState {
+    Pending,
     Active,
     Tie,
     Won { winner: Pubkey },
+    Cancelled,
+}
+
+impl fmt::Display for GameState {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            GameState::Pending => write!(f, "Pending"),
+            GameState::Active => write!(f, "Active"),
+            GameState::Tie => write!(f, "Tie"),
+            GameState::Won { winner } => write!(f, "Won by {:?}", winner),
+            GameState::Cancelled => write!(f, "Cancelled"),
+        }
+    }
 }
 
 #[derive(
