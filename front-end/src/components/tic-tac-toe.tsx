@@ -29,17 +29,13 @@ export interface Game {
 
 export interface TicTacToeBoardProps {
     gamePublicKey: PublicKey | null;
-    setGamePublicKey: React.Dispatch<React.SetStateAction<PublicKey | null>>;
-    setInfo: React.Dispatch<React.SetStateAction<string>>;
-    setTurn: React.Dispatch<React.SetStateAction<number>>;
     cells: string[];
-    setCells: React.Dispatch<React.SetStateAction<string[]>>;
     turn: number;
     playerTwo: Keypair;
     program: Program<TicTacToe> | null;
 }
 
-const TicTacToeBoard: React.FC<TicTacToeBoardProps> = ({ gamePublicKey, setInfo, setTurn, cells, setCells, turn, playerTwo, program }) => {
+const TicTacToeBoard: React.FC<TicTacToeBoardProps> = ({ gamePublicKey, cells, turn, playerTwo, program }) => {
     const wallet = useAnchorWallet();
 
     async (gamePublicKey: PublicKey, retries = 5, delay = 1000): Promise<Game> => {
@@ -92,7 +88,6 @@ const TicTacToeBoard: React.FC<TicTacToeBoardProps> = ({ gamePublicKey, setInfo,
 
         } catch (error: any) {
             console.error('Error during play:', error);
-            setInfo(`Error: ${error.message}`);
         }
     };
 

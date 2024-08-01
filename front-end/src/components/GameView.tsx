@@ -1,20 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { useAnchorWallet, useConnection } from '@solana/wallet-adapter-react';
 import { Program } from '@coral-xyz/anchor';
-import { PublicKey, Keypair, SystemProgram } from '@solana/web3.js';
-import { setupProgram } from '../anchor/setup';
+import { PublicKey, Keypair } from '@solana/web3.js';
+import { setupProgram } from '../anchor/setup.ts';
 import { TicTacToe } from '../anchor/idl.ts';
-import TicTacToeBoard, { Game, Sign } from './tic-tac-toe';
+import TicTacToeBoard, { Game, Sign } from './tic-tac-toe.tsx';
 import keypairData from './keypair.json';
 import Footer from './Footer.tsx';
 import '../App.css';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import { useParams } from 'react-router-dom';
 
-const Home: React.FC = () => {
+const GameView: React.FC = () => {
+    const { gamePublicKey } = useParams();
+    if (gamePublicKey) {
+        validateGamePublicKey(gamePublicKey);
+    }
     const { connection } = useConnection();
     const wallet = useAnchorWallet();
     const [program, setProgram] = useState<Program<TicTacToe> | null>(null);
-    const [gamePublicKey, setGamePublicKey] = useState<PublicKey | null>(null);
     const [cells, setCells] = useState<string[]>(Array(9).fill(''));
     const [info, setInfo] = useState<string>('cross goes first');
     const [playerTwo] = useState<Keypair>(
@@ -22,7 +26,22 @@ const Home: React.FC = () => {
     );
     const [turn, setTurn] = useState<number>(1);
     const [gameStarted, setGameStarted] = useState<boolean>(false);
-    const [awaitingPlayer, setAwaitingPlayer] = useState<boolean>(false);
+
+    function validateGamePublicKey(gamePublicKey: string) {
+        try {
+            const publicKey = new PublicKey(gamePublicKey);
+
+            if (!PublicKey.isOnCurve(publicKey.toBuffer())) {
+                console.error('Game public key is not on curve (not a valid public key)');
+                return false;
+            }
+
+            return true;
+        } catch (error) {
+            console.error('Invalid game public key:', error);
+            return false;
+        }
+    }
 
     useEffect(() => {
         if (wallet) {
@@ -39,7 +58,7 @@ const Home: React.FC = () => {
     useEffect(() => {
         const interval = setInterval(() => {
             if (gamePublicKey && program) {
-                fetchGameState(gamePublicKey)
+                fetchGameState(new PublicKey(gamePublicKey))
                     .then(gameState => {
                         if (!gameState) {
                             console.error('Game state not found');
@@ -49,7 +68,6 @@ const Home: React.FC = () => {
                     })
                     .catch(error => {
                         console.error('Error fetching game state:', error);
-                        // setInfo(`Error: ${error.message}`);
                     });
             }
         }, 100);
@@ -113,71 +131,43 @@ const Home: React.FC = () => {
         });
     }
 
-    const getInvitationLink = async () => {
-        if (program && wallet && !awaitingPlayer) {
-            console.log('Inviting player');
-            const gameKeypair = Keypair.generate();
-            setGamePublicKey(gameKeypair.publicKey);
-            const gameLink = getGameLink(gameKeypair.publicKey);
+    const joinGame = async () => {
+        // erronous psudo code
+        // if (program && wallet) {
+        //     console.log('Joining game');
 
-            try {
-                await program.methods
-                    .createGame(gameKeypair.publicKey)
-                    .accounts({
-                        game: gameKeypair.publicKey,
-                        playerOne: wallet.publicKey,
-                        systemProgram: SystemProgram.programId
-                    })
-                    .signers([gameKeypair])
-                    .rpc();
-            } catch (error: any) {
-                console.error('Error creating game:', error);
-            }
-            setInfo(`Game created! Share this link: ${gameLink}`);
-            setAwaitingPlayer(true);
-            return gameLink;
-        } else {
-            console.error('Program or wallet not available');
-        }
-    };
-
-    const getGameLink = (gamePublicKey: PublicKey): string => {
-        return `localhost:5173/${gamePublicKey.toBase58()}`;
+        //     try {
+        //         await program.methods
+        //             .setupGame(playerTwo.publicKey)
+        //             .accounts({
+        //                 game: gameKeypair.publicKey,
+        //                 playerOne: wallet.publicKey,
+        //                 systemProgram: SystemProgram.programId,
+        //             })
+        //             .signers([gameKeypair])
+        //             .rpc();
+        //     } catch (error: any) {
+        //         console.error('Error during game setup:', error);
+        //         // setInfo(`Error: ${error.message}`);
+        //         return;
+        //     }
+        // } else {
+        //     console.log('Program or wallet not available');
+        // }
     };
 
     const setupGame = async () => {
-        if (program && wallet) {
-            console.log('Setting up game');
-            const gameKeypair = Keypair.generate();
-            setGamePublicKey(gameKeypair.publicKey);
-
-            try {
-                await program.methods
-                    .setupGame(playerTwo.publicKey)
-                    .accounts({
-                        game: gameKeypair.publicKey,
-                        playerOne: wallet.publicKey,
-                        systemProgram: SystemProgram.programId,
-                    })
-                    .signers([gameKeypair])
-                    .rpc();
-            } catch (error: any) {
-                console.error('Error during game setup:', error);
-                // setInfo(`Error: ${error.message}`);
-                return;
-            }
-        } else {
-            console.log('Program or wallet not available');
-        }
+        // Implement setup game logic
     };
 
     return (
         <div className='home'>
             <h1 className='title'>Tic Tac Toe!</h1>
+            <p>Game Public Key: {gamePublicKey}</p>
             {gameStarted && program && gamePublicKey ? (
                 <div className="game-container">
                     <TicTacToeBoard
-                        gamePublicKey={gamePublicKey}
+                        gamePublicKey={new PublicKey(gamePublicKey)}
                         cells={cells}
                         turn={turn}
                         playerTwo={playerTwo}
@@ -187,14 +177,13 @@ const Home: React.FC = () => {
                 </div>
             ) : (
                 <div>
-                    <button onClick={setupGame} className='start-btn'>Start Game!</button>
-                    <button onClick={getInvitationLink} className='start-btn'>Invite</button>
+                    <button onClick={joinGame} className='start-btn'>Join!</button>
                     <div className="button-container">
                         <WalletMultiButton className="custom-wallet-button" />
                     </div>
                 </div>
             )}
-            {(gameStarted && program && gamePublicKey) || awaitingPlayer ? (
+            {(gameStarted && program && gamePublicKey) ? (
                 <p id="info">{info}</p>
             ) : null}
             <Footer />
@@ -202,4 +191,4 @@ const Home: React.FC = () => {
     );
 };
 
-export default Home;
+export default GameView;
