@@ -24,12 +24,10 @@ const Home: React.FC = () => {
 
     useEffect(() => {
         if (wallet) {
-            console.log('Initializing provider and program');
             const program = setupProgram(wallet);
             setProgram(program);
-            console.log('Program set:', program);
         } else {
-            console.log('No wallet connected');
+            console.error('No wallet connected');
             setProgram(null);
         }
     }, [wallet, connection]);
@@ -49,7 +47,7 @@ const Home: React.FC = () => {
                         console.error('Error fetching game state:', error);
                     });
             }
-        }, 1000);
+        }, 100);
 
         return () => {
             clearInterval(interval);
@@ -75,23 +73,27 @@ const Home: React.FC = () => {
             throw new Error('Board not found');
         } else if (gameState.turn === 1) {
             setCells(Array(9).fill(''));
-            setInfo(`Game setup! ${gameState.turn === 1 ? 'cross' : 'circle'} goes first.`);
+            if (wallet && wallet.publicKey == playerTwo && gameState.turn % 2 === 1) {
+                setInfo('Game started! Cross goes first.');
+            }
+            else {
+                setInfo('Game started! You go first.');
+            }
             setGameStarted(true);
             setTurn(gameState.turn);
             setPlayerTwo(gameState.players[1]);
             return;
         } else {
-            console.log('Game state after play:', gameState);
-            console.log('Board:', gameState.board);
-            console.log('Flat board:', gameState.board.flat());
-            console.log('Game state => Active, Won, Tie:', gameState.state);
-
             const newCells = transformBoard(gameState.board);
 
             setCells(newCells);
-            console.log('New cells:', newCells);
             if (gameState.state && gameState.state.active) {
-                setInfo(`It is now ${gameState.turn % 2 === 1 ? 'cross' : 'circle'}'s turn`);
+                if (gameState.turn % 2 === 1) {
+                    setInfo('It\'s your turn.');
+                }
+                else {
+                    setInfo('It\'s circle\'s turn.');
+                }
             }
 
             setTurn(gameState.turn);
@@ -119,36 +121,45 @@ const Home: React.FC = () => {
     }
 
     const getInvitationLink = async () => {
-        if (program && wallet && !awaitingPlayer) {
-            console.log('Inviting player');
-            const gameKeypair = Keypair.generate();
-            setGamePublicKey(gameKeypair.publicKey);
-            const gameLink = getGameLink(gameKeypair.publicKey);
-
-            try {
-                await program.methods
-                    .createGame()
-                    .accounts({
-                        game: gameKeypair.publicKey,
-                        playerOne: wallet.publicKey,
-                        systemProgram: SystemProgram.programId
-                    })
-                    .signers([gameKeypair])
-                    .rpc();
-            } catch (error: any) {
-                console.error('Error creating game:', error);
-            }
-            setInfo(`Game created! Share this link: ${gameLink}`);
-            setAwaitingPlayer(true);
-            return gameLink;
-        } else {
-            console.error('Program or wallet not available');
+        if (!program) {
+            console.error('Program not available');
+            return;
         }
+        if (!wallet) {
+            console.error('Wallet not available');
+            return;
+        }
+        if (awaitingPlayer) {
+            console.log('Awaiting player');
+            return;
+        }
+
+        const gameKeypair = Keypair.generate();
+        setGamePublicKey(gameKeypair.publicKey);
+        const gameLink = getGameLink(gameKeypair.publicKey);
+
+        try {
+            await program.methods
+                .createGame()
+                .accounts({
+                    game: gameKeypair.publicKey,
+                    playerOne: wallet.publicKey,
+                    systemProgram: SystemProgram.programId
+                })
+                .signers([gameKeypair])
+                .rpc();
+        } catch (error: any) {
+            console.error('Error creating game:', error);
+        }
+        setInfo(`Game created! Share this link: ${gameLink}`);
+        setAwaitingPlayer(true);
+        return gameLink;
     };
 
-    const getGameLink = (gamePublicKey: PublicKey): string => {
+    // TODO Read from env
+    function getGameLink(gamePublicKey: PublicKey): string {
         return `localhost:5173/${gamePublicKey.toBase58()}`;
-    };
+    }
 
     return (
         <div className='home'>
@@ -162,7 +173,7 @@ const Home: React.FC = () => {
                         playerTwo={playerTwo}
                         program={program}
                     />
-                    <button onClick={getInvitationLink} className='restart-btn'>Restart Game</button>
+                    {/* <button onClick={getInvitationLink} className='restart-btn'>Restart Game</button> */}
                 </div>
             ) : (
                 <div>
