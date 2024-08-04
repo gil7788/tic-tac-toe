@@ -11,7 +11,8 @@ export type TicTacToe = Idl & {
 };
 
 export const IDL: TicTacToe = {
-  address: "6WmnboLMNbXwnx2FvjjuowfXqufjjsnP1ojgGQdBcPzK",
+  // address: "6WmnboLMNbXwnx2FvjjuowfXqufjjsnP1ojgGQdBcPzK",
+  address: "4JKqkFCRdeto686BpgmTNn5vpGLZVJtcfxHW5fb6JnwC",
   metadata: {
     name: "ticTacToe",
     version: "0.1.0",
@@ -21,6 +22,58 @@ export const IDL: TicTacToe = {
   version: "0.1.0",
   name: "tic_tac_toe",
   instructions: [
+    {
+      name: "createGame",
+      accounts: [
+        {
+          name: "game",
+          isMut: true,
+          isSigner: true
+        },
+        {
+          name: "playerOne",
+          isMut: true,
+          isSigner: true
+        },
+        {
+          name: "systemProgram",
+          isMut: false,
+          isSigner: false
+        }
+      ],
+      args: []
+    },
+    {
+      name: "joinGame",
+      accounts: [
+        {
+          name: "game",
+          isMut: true,
+          isSigner: false
+        },
+        {
+          name: "playerTwo",
+          isMut: true,
+          isSigner: true
+        },
+        {
+          name: "playerOne",
+          isMut: false,
+          isSigner: false
+        },
+        {
+          name: "systemProgram",
+          isMut: false,
+          isSigner: false
+        }
+      ],
+      args: [
+        {
+          name: "playerTwo",
+          type: "publicKey"
+        }
+      ]
+    },
     {
       name: "play",
       accounts: [
@@ -43,37 +96,11 @@ export const IDL: TicTacToe = {
           }
         }
       ]
-    },
-    {
-      name: "setupGame",
-      accounts: [
-        {
-          name: "game",
-          isMut: true,
-          isSigner: true
-        },
-        {
-          name: "playerOne",
-          isMut: true,
-          isSigner: true
-        },
-        {
-          name: "systemProgram",
-          isMut: false,
-          isSigner: false
-        }
-      ],
-      args: [
-        {
-          name: "playerTwo",
-          type: "publicKey"
-        }
-      ]
     }
   ],
   accounts: [
     {
-      name: "Game",
+      name: "game",
       type: {
         kind: "struct",
         fields: [
@@ -141,10 +168,10 @@ export const IDL: TicTacToe = {
         kind: "enum",
         variants: [
           {
-            name: "X"
+            name: "x"
           },
           {
-            name: "O"
+            name: "o"
           }
         ]
       }
@@ -155,19 +182,25 @@ export const IDL: TicTacToe = {
         kind: "enum",
         variants: [
           {
-            name: "Active"
+            name: "pending"
           },
           {
-            name: "Tie"
+            name: "active"
           },
           {
-            name: "Won",
+            name: "tie"
+          },
+          {
+            name: "won",
             fields: [
               {
                 name: "winner",
                 type: "publicKey"
               }
             ]
+          },
+          {
+            name: "cancelled"
           }
         ]
       }
@@ -176,23 +209,23 @@ export const IDL: TicTacToe = {
   errors: [
     {
       code: 6000,
-      name: "TileOutOfBounds"
+      name: "tileOutOfBounds"
     },
     {
       code: 6001,
-      name: "TileAlreadySet"
+      name: "tileAlreadySet"
     },
     {
       code: 6002,
-      name: "GameAlreadyOver"
+      name: "gameAlreadyOver"
     },
     {
       code: 6003,
-      name: "NotPlayersTurn"
+      name: "notPlayersTurn"
     },
     {
       code: 6004,
-      name: "GameAlreadyStarted"
+      name: "gameAlreadyStarted"
     }
   ]
 };
