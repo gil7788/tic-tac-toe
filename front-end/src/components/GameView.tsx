@@ -4,12 +4,11 @@ import { Program } from '@coral-xyz/anchor';
 import { setupProgram } from '../anchor/setup.ts';
 import { TicTacToe } from '../anchor/idl.ts';
 import TicTacToeBoard, { Game, Sign } from './tic-tac-toe.tsx';
-import keypairData from './keypair.json';
 import Footer from './Footer.tsx';
 import '../App.css';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { useParams } from 'react-router-dom';
-import { PublicKey, Keypair, SystemProgram } from '@solana/web3.js';
+import { PublicKey, SystemProgram } from '@solana/web3.js';
 
 const GameView: React.FC = () => {
     const { gamePublicKey } = useParams();
@@ -22,9 +21,7 @@ const GameView: React.FC = () => {
     const [cells, setCells] = useState<string[]>(Array(9).fill(''));
     const [info, setInfo] = useState<string>('cross goes first');
     const [playerOneKey, setPlayerOneKey] = useState<PublicKey | null>(null);
-    const [playerTwo] = useState<Keypair>(
-        Keypair.fromSecretKey(Uint8Array.from(keypairData.secretKey))
-    );
+    const [playerTwo, setPlayerTwo] = useState<PublicKey | null>(null);
     const [turn, setTurn] = useState<number>(1);
     const [gameStarted, setGameStarted] = useState<boolean>(false);
 
@@ -49,6 +46,7 @@ const GameView: React.FC = () => {
             console.log('Initializing provider and program');
             const program = setupProgram(wallet);
             setProgram(program);
+            setPlayerTwo(wallet.publicKey);
             console.log('Program set:', program);
         } else {
             console.log('No wallet connected');
@@ -87,12 +85,8 @@ const GameView: React.FC = () => {
             if (!program) {
                 throw new Error(`Program ${program} not available`);
             }
-
-            // console.log('Fetching game state for:', gamePublicKey.toString());
             gameState = await program!.account.game.fetch(gamePublicKey) as unknown as Game;
-            // console.log('Fetched game state:', gameState);
         } catch (error) {
-            // console.error('Failed to fetch updated game state:', error);
             throw new Error(`Failed to fetch updated game state: ${error}`);
         }
         return gameState;
@@ -104,6 +98,7 @@ const GameView: React.FC = () => {
             throw new Error('Board not found');
         } else if (gameState.turn === 0) {
             setPlayerOneKey(gameState.players[0]);
+
         } else if (gameState.turn === 1) {
             setCells(Array(9).fill(''));
             setInfo(`Game setup! ${gameState.turn === 1 ? 'cross' : 'circle'} goes first.`);
@@ -169,14 +164,14 @@ const GameView: React.FC = () => {
         }
         try {
             await program.methods
-                .joinGame(playerTwo.publicKey)
+                .joinGame(playerTwo)
                 .accounts({
                     game: new PublicKey(gamePublicKey),
-                    playerTwo: playerTwo.publicKey,
+                    playerTwo: playerTwo,
                     playerOne: playerOneKey,
                     systemProgram: SystemProgram.programId,
                 })
-                .signers([playerTwo])
+                .signers([])
                 .rpc();
         } catch (error: any) {
             console.error('Error during game setup:', error);
@@ -190,7 +185,7 @@ const GameView: React.FC = () => {
             {(!gameStarted) ?
                 (<p>Game Public Key: {gamePublicKey}</p>) :
                 null}
-            {gameStarted && program && gamePublicKey ? (
+            {gameStarted && program && gamePublicKey && playerTwo ? (
                 <div>
                     <TicTacToeBoard
                         gamePublicKey={new PublicKey(gamePublicKey)}

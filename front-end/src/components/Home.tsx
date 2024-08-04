@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useAnchorWallet, AnchorWallet, useConnection } from '@solana/wallet-adapter-react';
+import { useAnchorWallet, useConnection } from '@solana/wallet-adapter-react';
 import { Program } from '@coral-xyz/anchor';
 import { PublicKey, Keypair, SystemProgram } from '@solana/web3.js';
 import { setupProgram } from '../anchor/setup';
 import { TicTacToe } from '../anchor/idl.ts';
 import TicTacToeBoard, { Game, Sign } from './tic-tac-toe';
-import keypairData from './keypair.json';
 import Footer from './Footer.tsx';
 import '../App.css';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
@@ -18,9 +17,7 @@ const Home: React.FC = () => {
     const [gamePublicKey, setGamePublicKey] = useState<PublicKey | null>(null);
     const [cells, setCells] = useState<string[]>(Array(9).fill(''));
     const [info, setInfo] = useState<string>('cross goes first');
-    const [playerTwo] = useState<Keypair>(
-        Keypair.fromSecretKey(Uint8Array.from(keypairData.secretKey))
-    );
+    const [playerTwo, setPlayerTwo] = useState<PublicKey | null>(null);
     const [turn, setTurn] = useState<number>(1);
     const [gameStarted, setGameStarted] = useState<boolean>(false);
     const [awaitingPlayer, setAwaitingPlayer] = useState<boolean>(false);
@@ -81,6 +78,7 @@ const Home: React.FC = () => {
             setInfo(`Game setup! ${gameState.turn === 1 ? 'cross' : 'circle'} goes first.`);
             setGameStarted(true);
             setTurn(gameState.turn);
+            setPlayerTwo(gameState.players[1]);
             return;
         } else {
             console.log('Game state after play:', gameState);
@@ -155,7 +153,7 @@ const Home: React.FC = () => {
     return (
         <div className='home'>
             <h1 className='title'>Tic Tac Toe!</h1>
-            {gameStarted && program && gamePublicKey ? (
+            {gameStarted && program && gamePublicKey && playerTwo ? (
                 <div>
                     <TicTacToeBoard
                         gamePublicKey={gamePublicKey}
