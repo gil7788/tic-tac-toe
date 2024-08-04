@@ -9,7 +9,6 @@ import Footer from './Footer.tsx';
 import '../App.css';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 
-
 const Home: React.FC = () => {
     const { connection } = useConnection();
     const wallet = useAnchorWallet();
@@ -156,9 +155,11 @@ const Home: React.FC = () => {
         return gameLink;
     };
 
-    // TODO Read from env
+
     function getGameLink(gamePublicKey: PublicKey): string {
-        return `localhost:5173/${gamePublicKey.toBase58()}`;
+        // let url = "localhost";
+        let url = "solana-tic-tac-toe.web.app";
+        return `${url}/${gamePublicKey.toBase58()}`;
     }
 
     return (
