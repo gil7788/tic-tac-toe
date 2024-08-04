@@ -1,6 +1,6 @@
 import { useAnchorWallet } from '@solana/wallet-adapter-react';
-import { web3, Program } from '@coral-xyz/anchor';
-import { PublicKey, Keypair } from '@solana/web3.js';
+import { Program } from '@coral-xyz/anchor';
+import { PublicKey } from '@solana/web3.js';
 import { TicTacToe } from '../anchor/idl.ts';
 import '../tic-tac-toe.css';
 
@@ -33,7 +33,7 @@ export interface TicTacToeBoardProps {
     gamePublicKey: PublicKey | null;
     cells: string[];
     turn: number;
-    playerTwo: Keypair;
+    playerTwo: PublicKey;
     program: Program<TicTacToe> | null;
 }
 
@@ -62,15 +62,15 @@ const TicTacToeBoard: React.FC<TicTacToeBoardProps> = ({ gamePublicKey, cells, t
         }
 
         const currentPlayer = turn % 2 === 1 ? wallet : {
-            publicKey: playerTwo.publicKey,
-            signTransaction: async (tx: web3.Transaction) => {
-                tx.partialSign(playerTwo);
-                return tx;
-            },
-            signAllTransactions: async (txs: web3.Transaction[]) => {
-                txs.forEach(tx => tx.partialSign(playerTwo));
-                return txs;
-            },
+            publicKey: playerTwo,
+            // signTransaction: async (tx: web3.Transaction) => {
+            //     tx.partialSign(playerTwo);
+            //     return tx;
+            // },
+            // signAllTransactions: async (txs: web3.Transaction[]) => {
+            //     txs.forEach(tx => tx.partialSign(playerTwo));
+            //     return txs;
+            // },
         };
 
         try {
@@ -85,7 +85,7 @@ const TicTacToeBoard: React.FC<TicTacToeBoardProps> = ({ gamePublicKey, cells, t
                     game: gamePublicKey,
                     player: currentPlayer.publicKey,
                 })
-                .signers(turn % 2 === 1 ? [] : [playerTwo])
+                .signers(turn % 2 === 1 ? [] : [])
                 .rpc();
 
         } catch (error: any) {
