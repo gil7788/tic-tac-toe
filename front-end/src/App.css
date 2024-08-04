@@ -40,11 +40,7 @@
 }
 
 #info {
-  /* position: relative; */
-  /* display: flex; */
-  /* margin: 1rem 0; */
-
-  /* top: 1rem; */
+  margin: 2rem;
   text-align: center;
 }
 
@@ -93,9 +89,6 @@
   background-color: #45a049;
   /* Darker green on hover */
 }
-
-
-/* App.css */
 
 .button-container {
   display: flex;

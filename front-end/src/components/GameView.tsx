@@ -47,9 +47,8 @@ const GameView: React.FC = () => {
             const program = setupProgram(wallet);
             setProgram(program);
             setPlayerTwo(wallet.publicKey);
-            console.log('Program set:', program);
         } else {
-            console.log('No wallet connected');
+            console.error('No wallet connected');
             setProgram(null);
         }
     }, [wallet, connection]);
@@ -101,21 +100,25 @@ const GameView: React.FC = () => {
 
         } else if (gameState.turn === 1) {
             setCells(Array(9).fill(''));
-            setInfo(`Game setup! ${gameState.turn === 1 ? 'cross' : 'circle'} goes first.`);
+            if (wallet && wallet.publicKey == playerTwo) {
+                setInfo('Game started! Cross goes first.');
+            }
+            else {
+                setInfo('Game started! You go first.');
+            }
             setGameStarted(true);
             setTurn(gameState.turn);
             return;
         } else {
-            console.log('Game state after play:', gameState);
-            console.log('Board:', gameState.board);
-            console.log('Flat board:', gameState.board.flat());
-            console.log('Game state => Active, Won, Tie:', gameState.state);
-
             const newCells = transformBoard(gameState.board);
 
             setCells(newCells);
-            console.log('New cells:', newCells);
-            setInfo(`It is now ${gameState.turn % 2 === 1 ? 'cross' : 'circle'}'s turn`);
+            if (gameState.turn % 2 === 1) {
+                setInfo('It\'s cross turn.');
+            }
+            else {
+                setInfo('It\'s your turn.');
+            }
             setTurn(gameState.turn);
         }
 
@@ -194,7 +197,6 @@ const GameView: React.FC = () => {
                         playerTwo={playerTwo}
                         program={program}
                     />
-                    <button className='restart-btn'>Restart Game</button>
                 </div>
             ) : (
                 <div>
