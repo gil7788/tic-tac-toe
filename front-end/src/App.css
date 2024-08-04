@@ -30,11 +30,6 @@
   font-size: 2em;
 }
 
-.game-container {
-  position: fixed;
-  top: 25%;
-}
-
 .restart-btn {
   margin-bottom: 2rem;
 
@@ -45,8 +40,11 @@
 }
 
 #info {
-  position: relative;
-  top: 1rem;
+  /* position: relative; */
+  /* display: flex; */
+  /* margin: 1rem 0; */
+
+  /* top: 1rem; */
   text-align: center;
 }
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAnchorWallet, useConnection } from '@solana/wallet-adapter-react';
+import { useAnchorWallet, AnchorWallet, useConnection } from '@solana/wallet-adapter-react';
 import { Program } from '@coral-xyz/anchor';
 import { PublicKey, Keypair, SystemProgram } from '@solana/web3.js';
 import { setupProgram } from '../anchor/setup';
@@ -9,6 +9,7 @@ import keypairData from './keypair.json';
 import Footer from './Footer.tsx';
 import '../App.css';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+
 
 const Home: React.FC = () => {
     const { connection } = useConnection();
@@ -49,15 +50,18 @@ const Home: React.FC = () => {
                     })
                     .catch(error => {
                         console.error('Error fetching game state:', error);
-                        // setInfo(`Error: ${error.message}`);
                     });
             }
-        }, 100);
+        }, 1000);
 
         return () => {
             clearInterval(interval);
         };
     }, [gamePublicKey, program]);
+
+    useEffect(() => {
+
+    }, [gameStarted]);
 
     async function fetchGameState(gamePublicKey: PublicKey): Promise<Game | null> {
         let gameState: Game | null = null;
@@ -88,7 +92,10 @@ const Home: React.FC = () => {
 
             setCells(newCells);
             console.log('New cells:', newCells);
-            setInfo(`It is now ${gameState.turn % 2 === 1 ? 'cross' : 'circle'}'s turn`);
+            if (gameState.state && gameState.state.active) {
+                setInfo(`It is now ${gameState.turn % 2 === 1 ? 'cross' : 'circle'}'s turn`);
+            }
+
             setTurn(gameState.turn);
         }
 
@@ -122,7 +129,7 @@ const Home: React.FC = () => {
 
             try {
                 await program.methods
-                    .createGame(gameKeypair.publicKey)
+                    .createGame()
                     .accounts({
                         game: gameKeypair.publicKey,
                         playerOne: wallet.publicKey,
@@ -145,37 +152,11 @@ const Home: React.FC = () => {
         return `localhost:5173/${gamePublicKey.toBase58()}`;
     };
 
-    const setupGame = async () => {
-        if (program && wallet) {
-            console.log('Setting up game');
-            const gameKeypair = Keypair.generate();
-            setGamePublicKey(gameKeypair.publicKey);
-
-            try {
-                await program.methods
-                    .setupGame(playerTwo.publicKey)
-                    .accounts({
-                        game: gameKeypair.publicKey,
-                        playerOne: wallet.publicKey,
-                        systemProgram: SystemProgram.programId,
-                    })
-                    .signers([gameKeypair])
-                    .rpc();
-            } catch (error: any) {
-                console.error('Error during game setup:', error);
-                // setInfo(`Error: ${error.message}`);
-                return;
-            }
-        } else {
-            console.log('Program or wallet not available');
-        }
-    };
-
     return (
         <div className='home'>
             <h1 className='title'>Tic Tac Toe!</h1>
             {gameStarted && program && gamePublicKey ? (
-                <div className="game-container">
+                <div>
                     <TicTacToeBoard
                         gamePublicKey={gamePublicKey}
                         cells={cells}
@@ -183,11 +164,10 @@ const Home: React.FC = () => {
                         playerTwo={playerTwo}
                         program={program}
                     />
-                    <button onClick={setupGame} className='restart-btn'>Restart Game</button>
+                    <button onClick={getInvitationLink} className='restart-btn'>Restart Game</button>
                 </div>
             ) : (
                 <div>
-                    <button onClick={setupGame} className='start-btn'>Start Game!</button>
                     <button onClick={getInvitationLink} className='start-btn'>Invite</button>
                     <div className="button-container">
                         <WalletMultiButton className="custom-wallet-button" />

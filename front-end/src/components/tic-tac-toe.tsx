@@ -10,9 +10,11 @@ export interface Tile {
 }
 
 export interface GameState {
+    pending?: {};
     active?: {};
     tie?: {};
     won?: { winner: PublicKey };
+    cancelled?: {};
 }
 
 export enum Sign {

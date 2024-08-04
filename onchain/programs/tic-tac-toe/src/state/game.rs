@@ -13,7 +13,7 @@ pub struct Game {
 }
 
 impl Game {
-    pub const MAXIMUM_SIZE: usize = (32 * 2) + 1 + (9 * (1 + 1)) + (32 + 1);
+    pub const MAXIMUM_SIZE: usize = 200 + (32 * 2) + 1 + (9 * (1 + 1)) + (32 + 1);
 
     pub fn create(&mut self, player_one: [Pubkey; 1]) -> Result<()> {
         require_eq!(self.turn, 0, TicTacToeError::GameAlreadyStarted);
