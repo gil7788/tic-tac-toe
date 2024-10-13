@@ -4,16 +4,18 @@ import { Program } from '@coral-xyz/anchor';
 import { PublicKey, Keypair, SystemProgram } from '@solana/web3.js';
 import { setupProgram } from '../anchor/setup';
 import { TicTacToe } from '../anchor/idl.ts';
-import TicTacToeBoard, { Game, Sign } from './tic-tac-toe';
+import TicTacToeBoard from './tic-tac-toe.tsx';
+import { Board, Game, Sign } from '../types/tic_tac_toe';
 import Footer from './Footer.tsx';
 import '../App.css';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 
+
 const Home: React.FC = () => {
     const { connection } = useConnection();
     const wallet = useAnchorWallet();
-    const [program, setProgram] = useState<Program<TicTacToe> | null>(null);
-    const [gamePublicKey, setGamePublicKey] = useState<PublicKey | null>(null);
+    const [gameProgram, setProgram] = useState<Program<TicTacToe> | null>(null);
+    const [matchPublicKey, setMatchPublicKey] = useState<PublicKey | null>(null);
     const [cells, setCells] = useState<string[]>(Array(9).fill(''));
     const [info, setInfo] = useState<string>('cross goes first');
     const [playerTwo, setPlayerTwo] = useState<PublicKey | null>(null);
@@ -21,10 +23,13 @@ const Home: React.FC = () => {
     const [gameStarted, setGameStarted] = useState<boolean>(false);
     const [awaitingPlayer, setAwaitingPlayer] = useState<boolean>(false);
 
+
+    const [subscriptionLock, setSubscription] = useState<boolean>(false);
+
     useEffect(() => {
         if (wallet) {
-            const program = setupProgram(wallet);
-            setProgram(program);
+            const gameProgram = setupProgram(wallet);
+            setProgram(gameProgram);
         } else {
             console.error('No wallet connected');
             setProgram(null);
@@ -32,40 +37,24 @@ const Home: React.FC = () => {
     }, [wallet, connection]);
 
     useEffect(() => {
-        const interval = setInterval(() => {
-            if (gamePublicKey && program) {
-                fetchGameState(gamePublicKey)
-                    .then(gameState => {
-                        if (!gameState) {
-                            console.error('Game state not found');
-                            return;
-                        }
-                        processState(gameState);
-                    })
-                    .catch(error => {
-                        console.error('Error fetching game state:', error);
-                    });
-            }
-        }, 100);
+        if (gameProgram && matchPublicKey && !subscriptionLock) {
+            connection.onAccountChange(matchPublicKey, async (accountInfo, context) => {
+                let gameState: Game | null = null;
 
-        return () => {
-            clearInterval(interval);
-        };
-    }, [gamePublicKey, program]);
-
-    useEffect(() => {
-
-    }, [gameStarted]);
-
-    async function fetchGameState(gamePublicKey: PublicKey): Promise<Game | null> {
-        let gameState: Game | null = null;
-        try {
-            gameState = await program!.account.game.fetch(gamePublicKey) as unknown as Game;
-        } catch (error) {
-            throw new Error('Failed to fetch updated game state');
+                try {
+                    const decodedGameData = gameProgram.account.game.coder.accounts.decode("game", accountInfo.data);
+                    gameState = decodedGameData as Game;
+                    console.log("Game state updated:", gameState);
+                    processState(gameState);
+                } catch (error) {
+                    console.error("Failed to fetch or decode updated game state", error);
+                    gameState = null;
+                }
+            });
+            // Ensure app subscribed to only 1 game at a time
+            setSubscription(!subscriptionLock);
         }
-        return gameState;
-    };
+    }, [matchPublicKey, gameProgram]);
 
     function processState(gameState: Game) {
         if (!gameState.board) {
@@ -100,14 +89,18 @@ const Home: React.FC = () => {
 
         if (gameState.state && gameState.state.won) {
             setInfo(`${gameState.state.won.winner.toBase58()} wins!`);
+            // Ensure app unsubscribed once game is over
+            setSubscription(!subscriptionLock);
             return;
         } else if (gameState.state && gameState.state.tie) {
             setInfo('Game over! It is a tie!');
+            // Ensure app unsubscribed once game is over
+            setSubscription(false);
             return;
         }
     }
 
-    function transformBoard(board: ({ x?: {} } | { o?: {} } | null)[][]): string[] {
+    function transformBoard(board: Board): string[] {
         return board.flat().map(cell => {
             if (cell && 'x' in cell) {
                 return Sign.X;
@@ -120,7 +113,7 @@ const Home: React.FC = () => {
     }
 
     const getInvitationLink = async () => {
-        if (!program) {
+        if (!gameProgram) {
             console.error('Program not available');
             return;
         }
@@ -133,19 +126,19 @@ const Home: React.FC = () => {
             return;
         }
 
-        const gameKeypair = Keypair.generate();
-        setGamePublicKey(gameKeypair.publicKey);
-        const gameLink = getGameLink(gameKeypair.publicKey);
+        const matchKeypair = Keypair.generate();
+        setMatchPublicKey(matchKeypair.publicKey);
+        const gameLink = getGameLink(matchKeypair.publicKey);
 
         try {
-            await program.methods
+            await gameProgram.methods
                 .createGame()
                 .accounts({
-                    game: gameKeypair.publicKey,
+                    game: matchKeypair.publicKey,
                     playerOne: wallet.publicKey,
                     systemProgram: SystemProgram.programId
                 })
-                .signers([gameKeypair])
+                .signers([matchKeypair])
                 .rpc();
         } catch (error: any) {
             console.error('Error creating game:', error);
@@ -156,23 +149,23 @@ const Home: React.FC = () => {
     };
 
 
-    function getGameLink(gamePublicKey: PublicKey): string {
-        // let url = "localhost";
+    function getGameLink(matchPublicKey: PublicKey): string {
+        // TODO change url according env [dev, release] = ["localhost", "solana-tic-tac-toe.web.app"];
         let url = "solana-tic-tac-toe.web.app";
-        return `${url}/${gamePublicKey.toBase58()}`;
+        return `${url}/${matchPublicKey.toBase58()}`;
     }
 
     return (
         <div className='home'>
             <h1 className='title'>Tic Tac Toe!</h1>
-            {gameStarted && program && gamePublicKey && playerTwo ? (
+            {gameStarted && gameProgram && matchPublicKey && playerTwo ? (
                 <div>
                     <TicTacToeBoard
-                        gamePublicKey={gamePublicKey}
+                        gamePublicKey={matchPublicKey}
                         cells={cells}
                         turn={turn}
                         playerTwo={playerTwo}
-                        program={program}
+                        program={gameProgram}
                     />
                     {/* <button onClick={getInvitationLink} className='restart-btn'>Restart Game</button> */}
                 </div>
@@ -184,7 +177,7 @@ const Home: React.FC = () => {
                     </div>
                 </div>
             )}
-            {(gameStarted && program && gamePublicKey) || awaitingPlayer ? (
+            {(gameStarted && gameProgram && matchPublicKey) || awaitingPlayer ? (
                 <p id="info">{info}</p>
             ) : null}
             <Footer />
@@ -193,3 +186,40 @@ const Home: React.FC = () => {
 };
 
 export default Home;
+
+
+/*
+useEffect(() => {
+        const { gamePublicKey } = useParams();
+    if (!gamePublicKey || !validateGamePublicKey(gamePublicKey)) {
+        throw new Error("Invalid Match Public Key.");
+    }
+    else if (!matchPublicKey) {
+        setMatchPublicKey(new PublicKey(gamePublicKey));
+    }
+    }, []);
+*/
+
+
+/*
+
+ useEffect(() => {
+        if (gameProgram && matchPublicKey && !subscriptionLock) {
+            connection.onAccountChange(matchPublicKey, async (accountInfo, context) => {
+                let gameState: Game | null = null;
+
+                try {
+                    const decodedGameData = gameProgram.account.game.coder.accounts.decode("game", accountInfo.data);
+                    gameState = decodedGameData as Game;
+                    console.log("Game state updated:", gameState);
+                    processState(gameState);
+                } catch (error) {
+                    console.error("Failed to fetch or decode updated game state", error);
+                    gameState = null;
+                }
+            });
+            // Ensure app subscribed to only 1 game at a time
+            setSubscription(!subscriptionLock);
+        }
+    }, [gamePublicKey, gameProgram]);
+*/

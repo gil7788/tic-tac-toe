@@ -1,58 +1,15 @@
 import { useAnchorWallet } from '@solana/wallet-adapter-react';
-import { Program } from '@coral-xyz/anchor';
-import { PublicKey } from '@solana/web3.js';
-import { TicTacToe } from '../anchor/idl.ts';
+import { TicTacToeBoardProps, Tile } from '../types/tic_tac_toe';
 import '../tic-tac-toe.css';
 
-export interface Tile {
-    row: number;
-    column: number;
-}
-
-export interface GameState {
-    pending?: {};
-    active?: {};
-    tie?: {};
-    won?: { winner: PublicKey };
-    cancelled?: {};
-}
-
-export enum Sign {
-    X = 'cross',
-    O = 'circle'
-}
-
-export interface Game {
-    players: [PublicKey, PublicKey];
-    turn: number;
-    board: ({ x?: {} } | { o?: {} } | null)[][];
-    state: GameState;
-}
-
-export interface TicTacToeBoardProps {
-    gamePublicKey: PublicKey | null;
-    cells: string[];
-    turn: number;
-    playerTwo: PublicKey;
-    program: Program<TicTacToe> | null;
-}
 
 const TicTacToeBoard: React.FC<TicTacToeBoardProps> = ({ gamePublicKey, cells, turn, playerTwo, program }) => {
     const wallet = useAnchorWallet();
 
-    async (gamePublicKey: PublicKey, retries = 5, delay = 1000): Promise<Game> => {
-        while (retries > 0) {
-            try {
-                const gameState = await program!.account.game.fetch(gamePublicKey) as unknown as Game;
-                return gameState;
-            } catch (error) {
-                if (retries === 1) throw error;
-                console.log(`Retrying fetch game state... attempts left: ${retries - 1}`);
-                await new Promise(resolve => setTimeout(resolve, delay));
-                retries--;
-            }
+    const handleClick = (index: number) => {
+        if (cells[index] === '') {
+            play(index);
         }
-        throw new Error('Failed to fetch game state');
     };
 
     const play = async (index: number) => {
@@ -79,6 +36,7 @@ const TicTacToeBoard: React.FC<TicTacToeBoardProps> = ({ gamePublicKey, cells, t
             console.log(`Playing at row ${row}, column ${column} by ${turn % 2 === 1 ? 'circle' : 'cross'}`);
             const tile: Tile = { row, column };
 
+            // TODO validate play method
             await program.methods
                 .play(tile)
                 .accounts({
@@ -90,12 +48,6 @@ const TicTacToeBoard: React.FC<TicTacToeBoardProps> = ({ gamePublicKey, cells, t
 
         } catch (error: any) {
             console.error('Error during play:', error);
-        }
-    };
-
-    const handleClick = (index: number) => {
-        if (cells[index] === '') {
-            play(index);
         }
     };
 

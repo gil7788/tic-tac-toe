@@ -3,31 +3,39 @@ import { useAnchorWallet, useConnection } from '@solana/wallet-adapter-react';
 import { Program } from '@coral-xyz/anchor';
 import { setupProgram } from '../anchor/setup.ts';
 import { TicTacToe } from '../anchor/idl.ts';
-import TicTacToeBoard, { Game, Sign } from './tic-tac-toe.tsx';
+import TicTacToeBoard from './tic-tac-toe.tsx';
+import { Board, Game, Sign } from '../types/tic_tac_toe';
 import Footer from './Footer.tsx';
 import '../App.css';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { useParams } from 'react-router-dom';
 import { PublicKey, SystemProgram } from '@solana/web3.js';
 
+// debug
+import { stringify } from 'flatted';
+
+
 const GameView: React.FC = () => {
     const { gamePublicKey } = useParams();
-    if (gamePublicKey) {
-        validateGamePublicKey(gamePublicKey);
+    if (!gamePublicKey || !validateGamePublicKey(gamePublicKey)) {
+        return;
     }
+    const matchPublicKey = new PublicKey(gamePublicKey);
     const { connection } = useConnection();
     const wallet = useAnchorWallet();
-    const [program, setProgram] = useState<Program<TicTacToe> | null>(null);
+    const [gameProgram, setProgram] = useState<Program<TicTacToe> | null>(null);
     const [cells, setCells] = useState<string[]>(Array(9).fill(''));
     const [info, setInfo] = useState<string>('cross goes first');
     const [playerOneKey, setPlayerOneKey] = useState<PublicKey | null>(null);
     const [playerTwo, setPlayerTwo] = useState<PublicKey | null>(null);
     const [turn, setTurn] = useState<number>(1);
     const [gameStarted, setGameStarted] = useState<boolean>(false);
+    const [subscriptionLock, setSubscription] = useState<boolean>(false);
 
-    function validateGamePublicKey(gamePublicKey: string) {
+    // TODO validate public key properly according to cookbook
+    function validateGamePublicKey(matchPublicKey: string) {
         try {
-            const publicKey = new PublicKey(gamePublicKey);
+            const publicKey = new PublicKey(matchPublicKey);
 
             if (!PublicKey.isOnCurve(publicKey.toBuffer())) {
                 console.error('Game public key is not on curve (not a valid public key)');
@@ -43,9 +51,9 @@ const GameView: React.FC = () => {
 
     useEffect(() => {
         if (wallet) {
-            console.log('Initializing provider and program');
-            const program = setupProgram(wallet);
-            setProgram(program);
+            console.log('Initializing provider and gameProgram');
+            const gameProgram = setupProgram(wallet);
+            setProgram(gameProgram);
             setPlayerTwo(wallet.publicKey);
         } else {
             console.error('No wallet connected');
@@ -54,9 +62,10 @@ const GameView: React.FC = () => {
     }, [wallet, connection]);
 
     useEffect(() => {
+        console.log(`1. matchPublicKey && gameProgram && wallet, ${matchPublicKey}, ${stringify(gameProgram?.programId)}, ${wallet?.publicKey}`);
         const interval = setInterval(() => {
-            if (gamePublicKey && program && wallet) {
-                fetchGameState(new PublicKey(gamePublicKey))
+            if (matchPublicKey && gameProgram && wallet) {
+                fetchGameState(new PublicKey(matchPublicKey))
                     .then(gameState => {
                         if (!gameState) {
                             console.error('Game state not found');
@@ -73,18 +82,18 @@ const GameView: React.FC = () => {
         return () => {
             clearInterval(interval);
         };
-    }, [gamePublicKey, program]);
+    }, [matchPublicKey, gameProgram]);
 
-    async function fetchGameState(gamePublicKey: PublicKey): Promise<Game | null> {
-        if (!gamePublicKey) {
+    async function fetchGameState(matchPublicKey: PublicKey): Promise<Game | null> {
+        if (!matchPublicKey) {
             throw new Error('Game public key not available');
         }
         let gameState: Game | null = null;
         try {
-            if (!program) {
-                throw new Error(`Program ${program} not available`);
+            if (!gameProgram) {
+                throw new Error(`Program ${gameProgram} not available`);
             }
-            gameState = await program!.account.game.fetch(gamePublicKey) as unknown as Game;
+            gameState = await gameProgram!.account.game.fetch(matchPublicKey) as unknown as Game;
         } catch (error) {
             throw new Error(`Failed to fetch updated game state: ${error}`);
         }
@@ -131,7 +140,7 @@ const GameView: React.FC = () => {
         }
     }
 
-    function transformBoard(board: ({ x?: {} } | { o?: {} } | null)[][]): string[] {
+    function transformBoard(board: Board): string[] {
         return board.flat().map(cell => {
             if (cell && 'x' in cell) {
                 return Sign.X;
@@ -145,11 +154,11 @@ const GameView: React.FC = () => {
 
     const joinGame = async () => {
         console.log('Joining game');
-        if (!program) {
+        if (!gameProgram) {
             console.error('Program not available');
             return;
         }
-        if (!gamePublicKey) {
+        if (!matchPublicKey) {
             console.error('Game public key not available');
             return;
         }
@@ -166,10 +175,10 @@ const GameView: React.FC = () => {
             return;
         }
         try {
-            await program.methods
+            await gameProgram.methods
                 .joinGame(playerTwo)
                 .accounts({
-                    game: new PublicKey(gamePublicKey),
+                    game: new PublicKey(matchPublicKey),
                     playerTwo: playerTwo,
                     playerOne: playerOneKey,
                     systemProgram: SystemProgram.programId,
@@ -186,16 +195,16 @@ const GameView: React.FC = () => {
         <div className='home'>
             <h1 className='title'>Tic Tac Toe!</h1>
             {(!gameStarted) ?
-                (<p>Game Public Key: {gamePublicKey}</p>) :
+                (<p>Game Public Key: {matchPublicKey.toString()}</p>) :
                 null}
-            {gameStarted && program && gamePublicKey && playerTwo ? (
+            {gameStarted && gameProgram && matchPublicKey && playerTwo ? (
                 <div>
                     <TicTacToeBoard
-                        gamePublicKey={new PublicKey(gamePublicKey)}
+                        gamePublicKey={new PublicKey(matchPublicKey)}
                         cells={cells}
                         turn={turn}
                         playerTwo={playerTwo}
-                        program={program}
+                        program={gameProgram}
                     />
                 </div>
             ) : (
@@ -206,7 +215,7 @@ const GameView: React.FC = () => {
                     </div>
                 </div>
             )}
-            {(gameStarted && program && gamePublicKey) ? (
+            {(gameStarted && gameProgram && matchPublicKey) ? (
                 <p id="info">{info}</p>
             ) : null}
             <Footer />

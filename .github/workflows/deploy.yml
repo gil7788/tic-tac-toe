@@ -32,5 +32,6 @@ jobs:
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
         run: |
+          firebase login
           yarn global add firebase-tools
           firebase deploy --only hosting --project solana-tic-tac-toe
