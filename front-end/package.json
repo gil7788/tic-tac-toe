@@ -11,12 +11,15 @@
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.29.0",
+    "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
+    "@esbuild-plugins/node-modules-polyfill": "^0.2.2",
     "@solana/wallet-adapter-base": "^0.9.23",
     "@solana/wallet-adapter-react": "^0.15.35",
     "@solana/wallet-adapter-react-ui": "^0.9.35",
     "@solana/wallet-adapter-wallets": "^0.19.27",
     "@solana/web3.js": "^1.90.0",
     "@types/react-router-dom": "^5.3.3",
+    "buffer": "^6.0.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.26.0"
