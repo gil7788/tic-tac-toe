@@ -4,7 +4,7 @@ import { Program } from '@coral-xyz/anchor';
 import { setupProgram } from '../anchor/setup.ts';
 import { TicTacToe } from '../anchor/idl.ts';
 import TicTacToeBoard from './tic-tac-toe.tsx';
-import { Board, Game, Sign } from '../types/tic_tac_toe';
+import { Board, Game, Sign } from '../types/tic_tac_toe.ts';
 import Footer from './Footer.tsx';
 import '../App.css';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
@@ -67,7 +67,7 @@ const GameView: React.FC = () => {
                     setPlayerOneKey(gameState.players[0]);
                     console.log("Game state fetched:", gameState);
 
-                    connection.onAccountChange(new PublicKey(matchPublicKey), async (accountInfo, context) => {
+                    connection.onAccountChange(new PublicKey(matchPublicKey), async (accountInfo) => {
                         let gameState: Game | null = null;
                         try {
                             const decodedGameData = gameProgram.account.game.coder.accounts.decode("game", accountInfo.data);

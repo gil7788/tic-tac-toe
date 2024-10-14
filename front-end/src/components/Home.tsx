@@ -5,7 +5,7 @@ import { PublicKey, Keypair, SystemProgram } from '@solana/web3.js';
 import { setupProgram } from '../anchor/setup';
 import { TicTacToe } from '../anchor/idl.ts';
 import TicTacToeBoard from './tic-tac-toe.tsx';
-import { Board, Game, Sign } from '../types/tic_tac_toe';
+import { Board, Game, Sign } from '../types/tic_tac_toe.ts';
 import Footer from './Footer.tsx';
 import '../App.css';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
@@ -38,7 +38,7 @@ const Home: React.FC = () => {
 
     useEffect(() => {
         if (gameProgram && matchPublicKey && !subscriptionLock) {
-            connection.onAccountChange(matchPublicKey, async (accountInfo, context) => {
+            connection.onAccountChange(matchPublicKey, async (accountInfo) => {
                 let gameState: Game | null = null;
 
                 try {

@@ -1,5 +1,5 @@
 import { useAnchorWallet } from '@solana/wallet-adapter-react';
-import { TicTacToeBoardProps, Tile } from '../types/tic_tac_toe';
+import { TicTacToeBoardProps, Tile } from '../types/tic_tac_toe.ts';
 import '../tic-tac-toe.css';
 
 
