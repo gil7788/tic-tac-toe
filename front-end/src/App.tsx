@@ -42,7 +42,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/home" element={<Home />} />
-              <Route path="/:gamePublicKey" element={<GameView />} />
+              <Route path="/:matchPublicKeyParam" element={<GameView />} />
             </Routes>
           </Router>
         </WalletModalProvider>
