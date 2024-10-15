@@ -5,15 +5,19 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-tic_tac_toe = "6WmnboLMNbXwnx2FvjjuowfXqufjjsnP1ojgGQdBcPzK"
+tic_tac_toe = "3kAj48dR3U8fbfsi14FDhFfuC4otHZrGoqvUFNpi5PAR"
+# tic_tac_toe = "6WmnboLMNbXwnx2FvjjuowfXqufjjsnP1ojgGQdBcPzK"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-# cluster = "localnet"
-cluster = "devnet"
+cluster = "localnet"
+# cluster = "devnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
 test = "yarn run mocha"
+
+# [workspace]
+# types = "../front-end/src/anchor/new_idl.ts"

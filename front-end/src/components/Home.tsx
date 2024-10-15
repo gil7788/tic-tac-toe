@@ -10,7 +10,6 @@ import Footer from './Footer.tsx';
 import '../App.css';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 
-
 const Home: React.FC = () => {
     const { connection } = useConnection();
     const wallet = useAnchorWallet();

@@ -6,7 +6,7 @@ pub mod errors;
 pub mod instructions;
 pub mod state;
 
-declare_id!("6WmnboLMNbXwnx2FvjjuowfXqufjjsnP1ojgGQdBcPzK");
+declare_id!("3kAj48dR3U8fbfsi14FDhFfuC4otHZrGoqvUFNpi5PAR");
 
 #[program]
 pub mod tic_tac_toe {
@@ -16,8 +16,8 @@ pub mod tic_tac_toe {
         instructions::create_game::create_game(ctx)
     }
 
-    pub fn join_game(ctx: Context<JoinGame>, player_two: Pubkey) -> Result<()> {
-        instructions::join_game::join_game(ctx, player_two)
+    pub fn join_game(ctx: Context<JoinGame>) -> Result<()> {
+        instructions::join_game::join_game(ctx)
     }
 
     pub fn play(ctx: Context<Play>, tile: Tile) -> Result<()> {

@@ -23,8 +23,8 @@ async function play(program: Program<TicTacToe>, game, player, tile, expectedTur
 }
 
 describe('tic-tac-toe', () => {
-    // Configure the client to use the local cluster.
-    anchor.setProvider(anchor.AnchorProvider.env());
+    const provider = anchor.AnchorProvider.local();
+    anchor.setProvider(provider);
 
     const program = anchor.workspace.TicTacToe as Program<TicTacToe>;
     const programProvider = program.provider as anchor.AnchorProvider;
@@ -48,19 +48,16 @@ describe('tic-tac-toe', () => {
             .accounts({
                 game: gameKeypair.publicKey,
                 playerOne: playerOne.publicKey,
-                systemProgram: anchor.web3.SystemProgram.programId,
             })
             .signers([gameKeypair, playerOne])
             .rpc();
 
         // Join game
         await program.methods
-            .joinGame(playerTwo.publicKey)
+            .joinGame()
             .accounts({
                 game: gameKeypair.publicKey,
-                playerOne: playerOne.publicKey,
                 playerTwo: playerTwo.publicKey,
-                systemProgram: anchor.web3.SystemProgram.programId,
             })
             .signers([playerTwo])
             .rpc();
@@ -91,19 +88,16 @@ describe('tic-tac-toe', () => {
             .accounts({
                 game: gameKeypair.publicKey,
                 playerOne: playerOne.publicKey,
-                systemProgram: anchor.web3.SystemProgram.programId,
             })
             .signers([gameKeypair, playerOne])
             .rpc();
 
         // Join game
         await program.methods
-            .joinGame(playerTwo.publicKey)
+            .joinGame()
             .accounts({
                 game: gameKeypair.publicKey,
-                playerOne: playerOne.publicKey,
                 playerTwo: playerTwo.publicKey,
-                systemProgram: anchor.web3.SystemProgram.programId,
             })
             .signers([playerTwo])
             .rpc();
@@ -292,19 +286,16 @@ describe('tic-tac-toe', () => {
             .accounts({
                 game: gameKeypair.publicKey,
                 playerOne: playerOne.publicKey,
-                systemProgram: anchor.web3.SystemProgram.programId,
             })
             .signers([gameKeypair, playerOne])
             .rpc();
 
         // Join game
         await program.methods
-            .joinGame(playerTwo.publicKey)
+            .joinGame()
             .accounts({
                 game: gameKeypair.publicKey,
-                playerOne: playerOne.publicKey,
                 playerTwo: playerTwo.publicKey,
-                systemProgram: anchor.web3.SystemProgram.programId,
             })
             .signers([playerTwo])
             .rpc();

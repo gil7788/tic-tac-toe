@@ -13,12 +13,12 @@ pub struct Game {
 }
 
 impl Game {
-    pub const MAXIMUM_SIZE: usize = 200 + (32 * 2) + 1 + (9 * (1 + 1)) + (32 + 1);
+    pub const MAXIMUM_SIZE: usize = (32 * 2) + 1 + (9 * (1 + 1)) + (32 + 1);
 
     pub fn create(&mut self, player_one: [Pubkey; 1]) -> Result<()> {
         require_eq!(self.turn, 0, TicTacToeError::GameAlreadyStarted);
         self.players = [player_one[0], Pubkey::default()];
-        self.turn = 0;
+        self.turn = 1;
         self.state = GameState::Pending;
         Ok(())
     }
@@ -32,9 +32,10 @@ impl Game {
     // }
 
     pub fn join(&mut self, player_one: Pubkey, player_two: Pubkey) -> Result<()> {
-        require_eq!(&self.state, &GameState::Pending);
+        require_eq!(self.turn, 1, TicTacToeError::GameAlreadyStarted);
+        require_eq!(&self.state, &GameState::Pending, TicTacToeError::InvalidState);
+        require_keys_eq!(player_one, self.players[0], TicTacToeError::InvalidState);
         self.players = [player_one, player_two];
-        self.turn = 1;
         self.state = GameState::Active;
         Ok(())
     }
