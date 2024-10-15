@@ -55,7 +55,28 @@ solana address -k target/deploy/tic_tac_toe-keypair.json
 4. Ensure that at Anchor.toml `[programs.localnet] tic_tac_toe =` is set to `<NEW ADDRESS>`
 
 ### Frontend
-By pushing to master branch, frontend github actions is triggered
+To deploy frontend app ,push to master branch, than frontend Github actions is triggered.
+
+Before Github action trigger activation, ensure that:
+1. At `src/main.tsx` Buffer is imported (needed at deployment, **however should be removed at development**)
+```bash
+import { Buffer } from 'buffer';
+
+window.Buffer = Buffer;
+```
+2. New Solana program address is updated at:
+    a. `src/anchor/idl.ts`
+    b.`src/anchor/setup.ts`
+
+3. Run
+```bash
+yarn build
+```
+4. (Optional) preview production version locally be running
+```bash
+yarn preview
+```
+5. Push to master directly or via a Pull Request (suggested)
 
 ## How to Test
 1. Shut down test validator

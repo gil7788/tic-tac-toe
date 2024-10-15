@@ -11,10 +11,9 @@ export type TicTacToe = Idl & {
 };
 
 export const IDL: TicTacToe = {
-  // address: "6WmnboLMNbXwnx2FvjjuowfXqufjjsnP1ojgGQdBcPzK",
-  address: "4JKqkFCRdeto686BpgmTNn5vpGLZVJtcfxHW5fb6JnwC",
+  address: "3kAj48dR3U8fbfsi14FDhFfuC4otHZrGoqvUFNpi5PAR",
   metadata: {
-    name: "ticTacToe",
+    name: "tic_tac_toe",
     version: "0.1.0",
     spec: "0.1.0",
     description: "Created with Anchor"
@@ -55,24 +54,9 @@ export const IDL: TicTacToe = {
           name: "playerTwo",
           isMut: true,
           isSigner: true
-        },
-        {
-          name: "playerOne",
-          isMut: false,
-          isSigner: false
-        },
-        {
-          name: "systemProgram",
-          isMut: false,
-          isSigner: false
         }
       ],
-      args: [
-        {
-          name: "playerTwo",
-          type: "publicKey"
-        }
-      ]
+      args: []
     },
     {
       name: "play",
@@ -107,10 +91,7 @@ export const IDL: TicTacToe = {
           {
             name: "players",
             type: {
-              array: [
-                "publicKey",
-                2
-              ]
+              array: ["publicKey", 2]
             }
           },
           {
@@ -137,9 +118,7 @@ export const IDL: TicTacToe = {
           },
           {
             name: "state",
-            type: {
-              defined: "GameState"
-            }
+            type: { defined: "GameState" }
           }
         ]
       }
@@ -167,12 +146,8 @@ export const IDL: TicTacToe = {
       type: {
         kind: "enum",
         variants: [
-          {
-            name: "x"
-          },
-          {
-            name: "o"
-          }
+          { name: "X" },
+          { name: "O" }
         ]
       }
     },
@@ -181,51 +156,26 @@ export const IDL: TicTacToe = {
       type: {
         kind: "enum",
         variants: [
+          { name: "Pending" },
+          { name: "Active" },
+          { name: "Tie" },
           {
-            name: "pending"
-          },
-          {
-            name: "active"
-          },
-          {
-            name: "tie"
-          },
-          {
-            name: "won",
+            name: "Won",
             fields: [
-              {
-                name: "winner",
-                type: "publicKey"
-              }
+              { name: "winner", type: "publicKey" }
             ]
           },
-          {
-            name: "cancelled"
-          }
+          { name: "Cancelled" }
         ]
       }
     }
   ],
   errors: [
-    {
-      code: 6000,
-      name: "tileOutOfBounds"
-    },
-    {
-      code: 6001,
-      name: "tileAlreadySet"
-    },
-    {
-      code: 6002,
-      name: "gameAlreadyOver"
-    },
-    {
-      code: 6003,
-      name: "notPlayersTurn"
-    },
-    {
-      code: 6004,
-      name: "gameAlreadyStarted"
-    }
+    { code: 6000, name: "tileOutOfBounds" },
+    { code: 6001, name: "tileAlreadySet" },
+    { code: 6002, name: "gameAlreadyOver" },
+    { code: 6003, name: "notPlayersTurn" },
+    { code: 6004, name: "gameAlreadyStarted" },
+    { code: 6005, name: "invalidState" }
   ]
 };

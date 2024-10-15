@@ -8,4 +8,5 @@ pub enum TicTacToeError {
     NotPlayersTurn,
     GameAlreadyStarted,
     InvalidState,
+    InvalidPlayerIndex,
 }

@@ -9,7 +9,7 @@ import Footer from './Footer.tsx';
 import '../App.css';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { useParams } from 'react-router-dom';
-import { PublicKey, SystemProgram } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 
 const GameView: React.FC = () => {
     const { connection } = useConnection();
@@ -163,12 +163,10 @@ const GameView: React.FC = () => {
 
         try {
             await gameProgram.methods
-                .joinGame(playerTwo)
+                .joinGame()
                 .accounts({
                     game: new PublicKey(matchPublicKey),
                     playerTwo: playerTwo,
-                    playerOne: playerOneKey,
-                    systemProgram: SystemProgram.programId,
                 })
                 .signers([])
                 .rpc();
