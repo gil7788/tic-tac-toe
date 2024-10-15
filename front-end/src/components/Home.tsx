@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAnchorWallet, useConnection } from '@solana/wallet-adapter-react';
 import { Program } from '@coral-xyz/anchor';
-import { PublicKey, Keypair, SystemProgram } from '@solana/web3.js';
+import { PublicKey, Keypair } from '@solana/web3.js';
 import { setupProgram } from '../anchor/setup';
 import { TicTacToe } from '../anchor/idl.ts';
 import TicTacToeBoard from './tic-tac-toe.tsx';
@@ -135,7 +135,6 @@ const Home: React.FC = () => {
                 .accounts({
                     game: matchKeypair.publicKey,
                     playerOne: wallet.publicKey,
-                    systemProgram: SystemProgram.programId
                 })
                 .signers([matchKeypair])
                 .rpc();

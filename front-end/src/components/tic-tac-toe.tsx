@@ -2,7 +2,6 @@ import { useAnchorWallet } from '@solana/wallet-adapter-react';
 import { TicTacToeBoardProps, Tile } from '../types/tic_tac_toe.ts';
 import '../tic-tac-toe.css';
 
-
 const TicTacToeBoard: React.FC<TicTacToeBoardProps> = ({ gamePublicKey, cells, turn, playerTwo, program }) => {
     const wallet = useAnchorWallet();
 
@@ -20,14 +19,6 @@ const TicTacToeBoard: React.FC<TicTacToeBoardProps> = ({ gamePublicKey, cells, t
 
         const currentPlayer = turn % 2 === 1 ? wallet : {
             publicKey: playerTwo,
-            // signTransaction: async (tx: web3.Transaction) => {
-            //     tx.partialSign(playerTwo);
-            //     return tx;
-            // },
-            // signAllTransactions: async (txs: web3.Transaction[]) => {
-            //     txs.forEach(tx => tx.partialSign(playerTwo));
-            //     return txs;
-            // },
         };
 
         try {
@@ -36,14 +27,13 @@ const TicTacToeBoard: React.FC<TicTacToeBoardProps> = ({ gamePublicKey, cells, t
             console.log(`Playing at row ${row}, column ${column} by ${turn % 2 === 1 ? 'circle' : 'cross'}`);
             const tile: Tile = { row, column };
 
-            // TODO validate play method
             await program.methods
                 .play(tile)
                 .accounts({
                     game: gamePublicKey,
                     player: currentPlayer.publicKey,
                 })
-                .signers(turn % 2 === 1 ? [] : [])
+                .signers([])
                 .rpc();
 
         } catch (error: any) {

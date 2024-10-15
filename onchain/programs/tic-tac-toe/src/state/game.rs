@@ -18,38 +18,18 @@ impl Game {
     pub fn create(&mut self, player_one: [Pubkey; 1]) -> Result<()> {
         require_eq!(self.turn, 0, TicTacToeError::GameAlreadyStarted);
         self.players = [player_one[0], Pubkey::default()];
-        self.turn = 1;
         self.state = GameState::Pending;
         Ok(())
     }
 
-    // pub fn start(&mut self, players: [Pubkey; 2]) -> Result<()> {
-    //     require_eq!(self.turn, 0, TicTacToeError::GameAlreadyStarted);
-    //     self.players = players;
-    //     self.turn = 1;
-    //     self.state = GameState::Active;
-    //     Ok(())
-    // }
-
     pub fn join(&mut self, player_one: Pubkey, player_two: Pubkey) -> Result<()> {
-        require_eq!(self.turn, 1, TicTacToeError::GameAlreadyStarted);
+        require_eq!(self.turn, 0, TicTacToeError::GameAlreadyStarted);
         require_eq!(&self.state, &GameState::Pending, TicTacToeError::InvalidState);
         require_keys_eq!(player_one, self.players[0], TicTacToeError::InvalidState);
         self.players = [player_one, player_two];
         self.state = GameState::Active;
+        self.turn = 1;
         Ok(())
-    }
-
-    pub fn is_active(&self) -> bool {
-        self.state == GameState::Active
-    }
-
-    fn current_player_index(&self) -> usize {
-        ((self.turn - 1) % 2) as usize
-    }
-
-    pub fn current_player(&self) -> Pubkey {
-        self.players[self.current_player_index()]
     }
 
     pub fn play(&mut self, tile: &Tile) -> Result<()> {
@@ -76,6 +56,24 @@ impl Game {
         }
 
         Ok(())
+    }
+
+    pub fn is_active(&self) -> bool {
+        self.state == GameState::Active
+    }
+
+    pub fn current_player(&self) -> Pubkey {
+        self.players[self.current_player_index()]
+    }
+
+    fn current_player_index(&self) -> usize {
+        // XOR
+        ((self.turn % 2 + 1) % 2) as usize
+    }
+
+    pub fn get_player_by_index(&self, i: usize) -> Result<Pubkey> {
+        require!(i == 0 || i == 1, TicTacToeError::InvalidPlayerIndex);
+        Ok(self.players[i])
     }
 
     fn update_state(&mut self) {
